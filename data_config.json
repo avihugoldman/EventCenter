@@ -1,0 +1,35 @@
+{
+  "HEADER": 64,
+  "PORT": 5055,
+  "PERSONS": 1,
+  "MASSAGE_TIMEOUT": 0.15,
+  "SIZE_OF_MAX_LIST": 10000,
+  "NO_CROSS_ZONE": 2,
+  "PPE_HELMET": 3,
+  "WATCH_MAN_ALERT": 4,
+  "DEAD_MAN_ALERT": 5,
+  "SMOKE_AND_LEAKAGE": 6,
+  "LEAKAGE": 7,
+  "ANOMALY": 9,
+  "TRAINING": [
+    10,
+    11,
+    12,
+    13,
+    14,
+    15
+  ],
+  "AVG_FRAME_RATE": 25,
+  "list_of_words_mean_yes": [
+    "Yes",
+    "yes",
+    "YES",
+    "True",
+    "true",
+    "TRUE",
+    "yap",
+    "Yap",
+    "YAP"
+  ],
+  "FORMAT": "utf-8"
+}
