@@ -8,9 +8,9 @@ class Checker(Event):
         self.cameraId = cameraId
 
     def isTimePassedFromLastEvent(self, camera):
-        if camera.timeoutCount:
-            if time.time() - camera.timeoutCount > camera.timeToOpenAfterClose:
-                return False
+        if camera.timeoutCount is not None:
+            if time.time() - camera.timeoutCount < camera.timeToOpenAfterClose:
+                return None
         return self
 
     def isEventInCamera(self, event, eventsInCamera):

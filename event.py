@@ -62,6 +62,7 @@ class Event(Detection):
                    # if time.time() - float(camera.timeoutCount) < camera.timeToOpenAfterClose:
                        # continue
                     event.startShipEvent()
+                    camera.timeoutCount = None
                     camera.WatchmanStarted = True
                     if event.id:
                         event.publishShipEvent()
@@ -115,6 +116,7 @@ class Event(Detection):
         else:
             if event.eventType != "PPE_HELMET":
                 event.startShipEvent()
+                camList[detection.originalCameraId].timeoutCount = None
                 if event.id:
                     event.subClassList.append(detection.subClass)
                     event.originalCameraId = detection.originalCameraId
@@ -122,6 +124,7 @@ class Event(Detection):
             else:
                 if detection.subClass == 2:
                     event.startShipEvent()
+                    camList[detection.originalCameraId].timeoutCount = None
                     if event.id:
                         event.subClassList.append(detection.subClass)
                         event.originalCameraId = detection.originalCameraId

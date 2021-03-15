@@ -3,11 +3,11 @@ Camera id
 event in each camera:
 2,3 2,3 2,3 2,3 2,3 2,3 2,3 2,3
 time to start event for each camera:
-10 10 10 10 10 10 10 10 10
+5 10 10 10 10 10 10 10 10
 numbers of frames in queue for each camera:
 4 4 90 90 90 90 90 90
 Timeout after publish to close event
-30 30 90 90 90 90 90 90 
+5 5 90 90 90 90 90 90
 Time from last close event
 30 30 30 30 30 30 30 30
 Time between smoke/leakage events or Time of no human detections for watchman
