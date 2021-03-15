@@ -6,10 +6,10 @@ class Checker(Event):
         super().__init__(args, type, cameraId)
         self.eventType = type
         self.cameraId = cameraId
-    print("yesss")
+
     def isTimePassedFromLastEvent(self, camera):
         if camera.timeoutCount:
-            if time.time() - camera.timeoutCount < camera.timeToOpenAfterClose:
+            if time.time() - camera.timeoutCount > camera.timeToOpenAfterClose:
                 return False
         return self
 

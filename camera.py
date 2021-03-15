@@ -28,8 +28,7 @@ class Camera:
 
     def __repr__(self):
         return (f"camera {self.id} event_type are: {self.eventTypes}")
-    print("hi")
-    print("second try")
+
     def convertEventIntToSTR(self):
         strEventTypes = []
         for eventType in self.intEventTypes:
