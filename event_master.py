@@ -1,13 +1,15 @@
 from camera import Camera
 from detection import Detection
-#from open_socket import OpenSocket
+from open_socket import OpenSocket
 from massage import Massage
 from checker import Checker
 from event import Event
+from event import Events
 import time
 from socket import *
 import socket
 import json
+from queue import Queue
 
 class EventMaster:
     def __init__(self):
@@ -75,6 +77,7 @@ class EventMaster:
         with open(jsonName, "r") as read_file:
             self.args = json.load(read_file)
         self.args["SERVER"] = str(line_list[31]).strip()
+        self.args["HOST"] = socket.gethostbyname(socket.gethostname())
         self.args["URL"] = str(line_list[33]).strip()
         self.args["VIDEO_STREAMS_PATH"] = str(line_list[35]).strip()
         self.args["VIDEO_STREAMS_SMOKE_PATH"] = str(line_list[37]).strip()
@@ -103,17 +106,49 @@ class EventMaster:
         massageReader.connect()
         return massageReader
 
-    def run(self, camList, sock):
-        #server = OpenSocket(self.HOST, self.PORT)
+    def runAsServer(self, camList):
+        server = OpenSocket(self.args)
+        server.server()
+        eventList = []
+        personEventList = Queue(maxsize=100)
+        counter = 0
+        while True:
+            counter += 1
+            str_list = server.currMassage.split("/")
+            if len(str_list) == 1:
+                continue
+            elif counter % 25 == 0:
+                currDetection = Detection(self.args)
+                currDetection.encode(str_list)
+                currDetection.cameraId = camList[int(currDetection.originalCameraId)].id
+                currChecker = Checker(self.args, currDetection.eventType, currDetection.cameraId)
+                boundariesCheck = currChecker.checkBoundaries(camList[currDetection.cameraId], currDetection)
+                currChecker.isEventInCamera(currDetection.eventType, camList[currDetection.cameraId].eventTypes)
+                lastEventCheck = currChecker
+                lastEventCheck.isTimePassedFromLastEvent(camList[currDetection.originalCameraId])
+                if currDetection.eventType == "PERSONS":
+                    personEventList.put(currDetection)
+                #if not currDetection.eventType or not boundariesCheck or not lastEventCheck:
+                if not lastEventCheck:
+                    print(f"fail: {currDetection.eventType, boundariesCheck, lastEventCheck}")
+                currDetection.x, currDetection.y = boundariesCheck
+                camList[currDetection.cameraId].lastDetectionInCamera = time.time()
+                if currDetection.eventType != "PERSONS":
+                    currEvent = Event(self.args, currDetection.cameraId, currDetection.eventType)
+                else:
+                    currEvent = Event(self.args, currDetection.cameraId, "NO_CROSS_ZONE")
+                    eventList = currEvent.handle_detection(currEvent, currDetection, camList, eventList, personEventList)
+                    currEvent = Event(self.args, currDetection.cameraId, "PPE_HELMET")
+                eventList = currEvent.handle_detection(currEvent, currDetection, camList, eventList, personEventList)
+
+
+    def runAsClient(self, camList, sock):
         eventList = []
         while True:
-            #string = server.server()
-            #str_list = string.split(" ")
             list_of_strings = sock.handle_massage()
             for string in list_of_strings:
                 str_list = string.split(" ")
                 if str_list[0] == 'Non':
-                    #eventList = Event.handle_no_detction(self.args, camList, eventList)
                     tempEvent = Event(self.args, -1, -1)
                     eventList = tempEvent.handle_no_detction(camList, eventList)
                 else:
@@ -125,7 +160,7 @@ class EventMaster:
                     currChecker.isEventInCamera(currDetection.eventType, camList[currDetection.cameraId].eventTypes)
                     lastEventCheck = currChecker
                     lastEventCheck.isTimePassedFromLastEvent(camList[currDetection.originalCameraId])
-                    #if not currDetection.eventType or not boundariesCheck or not lastEventCheck:
+                    # if not currDetection.eventType or not boundariesCheck or not lastEventCheck:
                     if not lastEventCheck:
                         print(f"fail: {currDetection.eventType, boundariesCheck, lastEventCheck}")
                         break

@@ -19,9 +19,16 @@ class Detection:
         self.eventType = self.convertEventIntToSTR(int(string[2]))
         self.subClass = int(string[3])
         self.objId = int(string[4])
-        self.x = self.covertStrToFloatList(string[5])
-        self.y = self.covertStrToFloatList(string[6])
-        #self.netName = int(string[7])
+        try:
+            self.netName = str(string[7])
+        except ValueError:
+            self.netName = "Smoke"
+        if self.netName == "SMOKE":
+            self.x = self.covertStrToFloatListYoav(string[5])
+            self.x = self.covertStrToFloatListYoav(string[5])
+        else:
+            self.x = self.covertStrToFloatList(string[5])
+            self.y = self.covertStrToFloatList(string[6])
 
     def convertEventIntToSTR(self, event_type):
         if event_type == self.args["PERSONS"]:
@@ -44,6 +51,18 @@ class Detection:
     def covertStrToFloatList(self, str_object):
         temp_list = []
         list_object = []
+        str_object = str_object.strip("[ ]")
+        str_object = str_object.split(", ")
+        str_object = [i.split(",") for i in str_object]
+        for lst in str_object:
+            for num in lst:
+                temp_list.append(float(num))
+            list_object.append(temp_list)
+        return list_object
+
+    def covertStrToFloatListYoav(self, str_object):
+        temp_list = []
+        list_object = []
         str_object = str_object.strip("[,]")
         str_object = str_object.split()
         str_object = [i.split(",") for i in str_object]
@@ -52,8 +71,6 @@ class Detection:
                 temp_list.append(float(num))
             list_object.append(temp_list)
         return list_object
-
-
 
 
 

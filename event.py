@@ -5,6 +5,7 @@ import logging
 import requests
 import threading
 
+
 class Event(Detection):
     def __init__(self, args, cameraId, type, open = False):
         super().__init__(args)
@@ -71,7 +72,7 @@ class Event(Detection):
                         listOfTotalEvents.append(event)
         return listOfTotalEvents
 
-    def handle_detection(self, event, detection, camList, eventList):
+    def handle_detection(self, event, detection, camList, eventList, personEventList):
         # handle WATCHMAN
         if detection.eventType == "NO_CROSS_ZONE" or detection.eventType == "PPE_HELMET":
             tempevent = Event(self.args, detection.camId, "WATCHMAN")
@@ -83,6 +84,7 @@ class Event(Detection):
                 camList[detection.originalCameraId].timeoutCount = time.time()
                 eventList.remove(curr)
         if event in eventList:
+            flag = False
             curr = eventList[eventList.index(event)]
             #event.id = 1
             curr.addObjectToList(detection.subClass, camList[curr.originalCameraId].queueSize)
@@ -91,7 +93,13 @@ class Event(Detection):
             curr.originalCameraId = detection.originalCameraId
             time_diff = time.time() - curr.startTime
             curr.x, curr.y, curr.serialId = detection.x, detection.y, detection.serialId
-            if time_diff > camList[curr.originalCameraId].timeToPublish:
+            if detection.eventType != "ANOMALY":
+                if time_diff > camList[curr.originalCameraId].timeToPublish:
+                    flag = True
+            else:
+                if time_diff > camList[curr.originalCameraId].timeToPublish:
+                    flag = True
+            if flag:
                 if len(curr.subClassList) >= camList[curr.originalCameraId].queueSize:
                     if detection.eventType != "PPE_HELMET":
                         if curr.isItRealDetection(curr.subClassList):
@@ -114,14 +122,15 @@ class Event(Detection):
                                 if self.args["DEBUG"]:
                                     print(f"NO_CROSS_ZONE event published in camera {self.cameraId} in time {time.time()}")
         else:
-            if event.eventType != "PPE_HELMET":
-                event.startShipEvent()
-                camList[detection.originalCameraId].timeoutCount = None
-                if event.id:
-                    event.subClassList.append(detection.subClass)
-                    event.originalCameraId = detection.originalCameraId
-                    eventList.append(event)
-            else:
+            if event.eventType == "ANOMALY":
+                if personEventList.qsize() == 0:
+                    event.startShipEvent()
+                    camList[detection.originalCameraId].timeoutCount = None
+                    if event.id:
+                        event.subClassList.append(detection.subClass)
+                        event.originalCameraId = detection.originalCameraId
+                        eventList.append(event)
+            if event.eventType == "PPE_HELMET":
                 if detection.subClass == 2:
                     event.startShipEvent()
                     camList[detection.originalCameraId].timeoutCount = None
@@ -129,6 +138,13 @@ class Event(Detection):
                         event.subClassList.append(detection.subClass)
                         event.originalCameraId = detection.originalCameraId
                         eventList.append(event)
+            else:
+                event.startShipEvent()
+                camList[detection.originalCameraId].timeoutCount = None
+                if event.id:
+                    event.subClassList.append(detection.subClass)
+                    event.originalCameraId = detection.originalCameraId
+                    eventList.append(event)
         return eventList
 
     def addObjectToList(self, tempDetection, size):
@@ -305,10 +321,15 @@ class Event(Detection):
             return True
         return False
 
-    class Events:
-        def __init__(self):
-            self.eventsList = []
-            self.openEventsOnly = bool
+class Events:
+    def __init__(self):
+        self.eventList = []
+        self.openEventsOnly = bool
 
-        def __repr__(self):
-            return (f"[{self.eventsList}]")
+    def __repr__(self):
+        return (f"[{self.eventList}]")
+
+    def addObjectToList(self, tempDetection, size):
+        if len(self.eventList) > size:
+            self.eventList.pop()
+        self.eventList.append(tempDetection)
