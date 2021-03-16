@@ -1,3 +1,5 @@
+import time
+
 
 class Detection:
     def __init__(self, args):
@@ -10,6 +12,7 @@ class Detection:
         self.x = []
         self.y = []
         self.netName = str
+        self.updateTime = time.time()
 
     def __repr__(self):
         return (f"camera [{self.cameraId}] objId [{self.objId}] eventType [{self.eventType}] subClass [{self.subClass}] x {self.x} y {self.y}")

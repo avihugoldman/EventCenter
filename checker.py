@@ -39,14 +39,14 @@ class Checker(Event):
         detection_y_size = detection_y_end - detection_y_start
         detectionTotalArea = detection_x_size * detection_y_size
         if detection_x_start < float(camera.x_start):
-            print("off limits!")
+            # print("off limits!")
             detection.x[0][0] = camera.x_start
         if detection_x_end > float(camera.x_end):
             # print("off limits!")
             detection.x[0][1] = camera.x_end
         if abs(detection.x[0][1] - detection.x[0][0]) <= 0.01:
             self.boundaries = False
-        if detection_y_size < camera.minSize or detection_y_size > camera.maxSize and detection.eventType == "PERSONS":
+        if (detection_y_size < camera.minSize or detection_y_size > camera.maxSize) and detection.eventType == "PERSONS":
             self.boundaries = False
         if detection_y_start < float(camera.y_start):
             # print("off limits!")

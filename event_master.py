@@ -146,19 +146,18 @@ class EventMaster:
                 currDetection.encode(str_list)
                 currDetection.cameraId = camList[int(currDetection.originalCameraId)].id
                 currChecker = Checker(self.args, currDetection.eventType, currDetection.cameraId)
-                currChecker.checkBoundaries(camList[currDetection.cameraId], currDetection)
-                currChecker.isEventInCamera(currDetection.eventType, camList[currDetection.cameraId].eventTypes)
+                currChecker.checkBoundaries(camList[currDetection.originalCameraId], currDetection)
+                currChecker.isEventInCamera(currDetection.eventType, camList[currDetection.originalCameraId].eventTypes)
                 currChecker.isTimePassedFromLastEvent(camList[currDetection.originalCameraId])
                 checkList = [currChecker.boundaries, currChecker.timeFromLastClosed, currChecker.eventInCamera]
-                if not all(checkList):
-                    # print(f"fail: boundaries: {currChecker.boundaries} timeFromLastClosed: {currChecker.timeFromLastClosed} eventInCamera: {currChecker.eventInCamera}")
-                    break
-                #lastEventCheck.isTimePassedFromLastEvent(camList[currDetection.originalCameraId])
+                #print(currDetection)
                 if currDetection.eventType == "PERSONS":
                     personEventList.put(currDetection)
-                #if not currDetection.eventType or not boundariesCheck or not lastEventCheck:
+               # if not all(checkList):
+                    # print(f"fail: boundaries: {currChecker.boundaries} timeFromLastClosed: {currChecker.timeFromLastClosed} eventInCamera: {currChecker.eventInCamera}")
+                    #break
                 currDetection.x, currDetection.y = currChecker.x, currDetection.y
-                camList[currDetection.cameraId].lastDetectionInCamera = time.time()
+                camList[currDetection.originalCameraId].lastDetectionInCamera = time.time()
                 if currDetection.eventType != "PERSONS":
                     currEvent = Event(self.args, currDetection.cameraId, currDetection.eventType)
                 else:
@@ -169,33 +168,37 @@ class EventMaster:
 
     def runAsClient(self, camList, sock):
         eventList = []
+        personEventList = Queue(maxsize=100)
         while True:
             list_of_strings = sock.handle_massage()
             for string in list_of_strings:
                 str_list = string.split(" ")
                 if str_list[0] == 'Non':
                     tempEvent = Event(self.args, -1, -1)
-                    eventList = tempEvent.handle_no_detction(camList, eventList)
+                    eventList = tempEvent.handle_no_detction(camList, eventList, personEventList)
                 else:
                     currDetection = Detection(self.args)
                     currDetection.encode(str_list)
                     currDetection.cameraId = camList[int(currDetection.originalCameraId)].id
+                    if personEventList.full():
+                        personEventList.get()
+                    personEventList.put(currDetection)
                     currChecker = Checker(self.args, currDetection.eventType, currDetection.cameraId)
-                    currChecker.checkBoundaries(camList[currDetection.cameraId], currDetection)
-                    currChecker.isEventInCamera(currDetection.eventType, camList[currDetection.cameraId].eventTypes)
+                    currChecker.checkBoundaries(camList[currDetection.originalCameraId], currDetection)
+                    currChecker.isEventInCamera(currDetection.eventType, camList[currDetection.originalCameraId].eventTypes)
                     currChecker.isTimePassedFromLastEvent(camList[currDetection.originalCameraId])
                     checkList = [currChecker.boundaries, currChecker.timeFromLastClosed, currChecker.eventInCamera]
                     if not all(checkList):
                         #print(f"fail: boundaries: {currChecker.boundaries} timeFromLastClosed: {currChecker.timeFromLastClosed} eventInCamera: {currChecker.eventInCamera}")
                         break
                     currDetection.x, currDetection.y = currChecker.x, currChecker.y
-                    camList[currDetection.cameraId].lastDetectionInCamera = time.time()
+                    camList[currDetection.originalCameraId].lastDetectionInCamera = time.time()
                     if currDetection.eventType != "PERSONS":
                         currEvent = Event(self.args, currDetection.cameraId, currDetection.eventType)
-                        eventList = eventList.handle_detection(currEvent, currDetection, camList, eventList)
                     else:
                         currEvent = Event(self.args, currDetection.cameraId, "NO_CROSS_ZONE")
-                        eventList = currEvent.handle_detection(currEvent, currDetection, camList, eventList, [])
-                        if "PPE_HELMET" in camList[currDetection.originalCameraId].eventTypes:
-                            currEvent = Event(self.args, currDetection.cameraId, "PPE_HELMET")
-                            eventList = currEvent.handle_detection(currEvent, currDetection, camList, eventList, [])
+                        eventList = currEvent.handle_detection(currEvent, currDetection, camList, eventList,
+                                                               personEventList)
+                        currEvent = Event(self.args, currDetection.cameraId, "PPE_HELMET")
+                    eventList = currEvent.handle_detection(currEvent, currDetection, camList, eventList,
+                                                           personEventList)

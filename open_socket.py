@@ -16,9 +16,8 @@ class OpenSocket:
             data = conn.recv(1024).decode()
             if data:  # SEND ONLY WHEN NEW INFO IS RECEIVED
                 self.currMassage = data
-                print(threading.active_count())
-                if self.args["DEBUG"]:
-                    print(data)
+                #if self.args["DEBUG"]:
+                    #print(data)
             else:
                 break
         conn.close()

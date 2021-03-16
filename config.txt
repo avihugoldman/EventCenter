@@ -1,23 +1,23 @@
 Camera id
 1 2 3 4 5 6 7 8 9 10
 event in each camera:
-2, 2, 2, 2, 2, 2, 2, 2, 2, 2
+9, 9, 9, 9, 9, 9, 9, 2, 2, 2
 time to start event for each camera:
 10 10 10 10 10 10 10 10 10 10
 numbers of frames in queue for each camera:
-4 90 90 90 90 90 90 90 90 90
+90 90 90 90 90 90 90 90 90 90
 Timeout after publish to close event
-30 30 30 30 30 30 30 30 30 30
+30 10 30 30 30 30 30 30 30 30
 Time from last close event
 30 30 30 30 30 30 30 30 30 30
 Time between smoke/leakage events or Time of no human detections for watchman
-240 240 240 240 240 240 240 240 240 240
+240 10 240 240 240 240 240 240 240 240
 Time of no human detections for watchman
 10 10 10 10 10 10 10 10 10 10
 Max area of human
-0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 
+0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5 0.5
 Min area of human
-0 0 0 0 0 0 0 0 0 0
+0.8 0 0 0 0 0 0 0 0 0
 start interest area x for each camera:
 0 0 0 0 0 0 0 0 0 0
 end interest area x for each camera:

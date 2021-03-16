@@ -29,7 +29,7 @@ class Event(Detection):
     def __eq__(self, other):
         return self.eventType == other.eventType and self.cameraId == other.cameraId
 
-    def handle_no_detction(self, camList, listOfTotalEvents):
+    def handle_no_detction(self, camList, listOfTotalEvents, personEventList):
         counter = -1
         tempPublishedEventList = [tempEvent for tempEvent in listOfTotalEvents if tempEvent.published and tempEvent.eventType != "WATCHMAN"]
         for obj in tempPublishedEventList:
@@ -38,18 +38,25 @@ class Event(Detection):
                 obj.endShipEvent()
                 listOfTotalEvents.remove(obj)
                 camList[obj.originalCameraId].timeoutCount = time.time()
+                break
+            if obj.eventType == "WATCHMAN" and personEventList.notempty():
+                if personEventList.get().updateTime - obj.startTime > 0 :
+                    obj.endShipEvent()
+                    listOfTotalEvents.remove(obj)
+                    camList[obj.originalCameraId].timeoutCount = time.time()
         tempNotPublishedEventList = [tempEvent for tempEvent in listOfTotalEvents if not tempEvent.published and tempEvent.eventType != "WATCHMAN"]
         for obj in tempNotPublishedEventList:
             if time.time() - obj.startTime > camList[obj.originalCameraId].timeToPublish + 1:
                 obj.endShipEvent()
                 listOfTotalEvents.remove(obj)
-                camList[obj.originalCameraId].timeoutCount = time.time()
+                camList[obj.originalCameraId].timeoutCount = None
         for camera in camList:
             counter += 1
             if "WATCHMAN" in camera.eventTypes and time.time() - camera.lastDetectionInCamera > camera.timeForWatchman:
                 event = Event(self.args, camera.id, "WATCHMAN")
                 if event in listOfTotalEvents:
                     curr = listOfTotalEvents[listOfTotalEvents.index(event)]
+                    curr.x, curr.y, curr.serialId = [[0, 1]], [[0, 1]], 1
                     if time.time() - curr.startTime > camera.timeoutAfterPublish:
                         curr.endShipEvent()
                         camList[curr.originalCameraId].timeoutCount = time.time()
@@ -61,27 +68,28 @@ class Event(Detection):
                 else:
                    # if time.time() - float(camera.timeoutCount) < camera.timeToOpenAfterClose:
                        # continue
-                    event.startShipEvent()
-                    camera.timeoutCount = None
-                    camera.WatchmanStarted = True
-                    if event.id:
-                        event.publishShipEvent()
-                        event.cameraId = camera.id
-                        event.originalCameraId = counter
-                        listOfTotalEvents.append(event)
+                   if camera.timeoutCount is None:
+                       event.startShipEvent()
+                       camera.timeoutCount = None
+                       camera.WatchmanStarted = True
+                       if event.id:
+                           event.publishShipEvent()
+                           event.cameraId = camera.id
+                           event.originalCameraId = counter
+                           listOfTotalEvents.append(event)
+                   else:
+                       if not time.time() - camera.timeoutCount < camera.timeToOpenAfterClose:
+                            event.startShipEvent()
+                            camera.timeoutCount = None
+                            camera.WatchmanStarted = True
+                            if event.id:
+                                event.publishShipEvent()
+                                event.cameraId = camera.id
+                                event.originalCameraId = counter
+                                listOfTotalEvents.append(event)
         return listOfTotalEvents
 
     def handle_detection(self, event, detection, camList, eventList, personEventList):
-        # handle WATCHMAN
-        if detection.eventType == "NO_CROSS_ZONE" or detection.eventType == "PPE_HELMET":
-            tempevent = Event(self.args, detection.camId, "WATCHMAN")
-            if tempevent in eventList:
-                curr = eventList[eventList.index(tempevent)]
-                curr.endShipEvent()
-                camList[detection.originalCameraId].WatchmanStarted = False
-                curr.originalCameraId = detection.originalCameraId
-                camList[detection.originalCameraId].timeoutCount = time.time()
-                eventList.remove(curr)
         if event in eventList:
             flag = False
             curr = eventList[eventList.index(event)]

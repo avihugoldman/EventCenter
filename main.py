@@ -17,8 +17,6 @@ if __name__ == '__main__':
     for camera in camList:
         camera.convertEventIntToSTR()
 
-    print(camList)
-
     if args.type == "Q":
         exit(0)
 
