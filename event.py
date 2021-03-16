@@ -47,7 +47,6 @@ class Event(Detection):
         for camera in camList:
             counter += 1
             if "WATCHMAN" in camera.eventTypes and time.time() - camera.lastDetectionInCamera > camera.timeForWatchman:
-                print("yes")
                 event = Event(self.args, camera.id, "WATCHMAN")
                 if event in listOfTotalEvents:
                     curr = listOfTotalEvents[listOfTotalEvents.index(event)]

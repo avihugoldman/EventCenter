@@ -10,15 +10,14 @@ if __name__ == '__main__':
 
     em = EventMaster()
 
-    #camList = em.load_configuration("config.txt", "data_config.json")
+    camList = em.load_configuration("config.txt", "data_config.json")
 
-    camList = em.load_configuration_from_json("data_config.json")
-
-    print(camList)
+    #camList = em.load_configuration_from_json("data_config.json")
 
     for camera in camList:
         camera.convertEventIntToSTR()
 
+    print(camList)
 
     if args.type == "Q":
         exit(0)

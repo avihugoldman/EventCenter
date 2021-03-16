@@ -9,6 +9,7 @@ class Detection:
         self.subClass = int
         self.x = []
         self.y = []
+        self.netName = str
 
     def __repr__(self):
         return (f"camera [{self.cameraId}] objId [{self.objId}] eventType [{self.eventType}] subClass [{self.subClass}] x {self.x} y {self.y}")
@@ -21,7 +22,7 @@ class Detection:
         self.objId = int(string[4])
         try:
             self.netName = str(string[7])
-        except ValueError:
+        except IndexError:
             self.netName = "Smoke"
         if self.netName == "SMOKE":
             self.x = self.covertStrToFloatListYoav(string[5])
