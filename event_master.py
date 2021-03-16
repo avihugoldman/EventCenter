@@ -28,7 +28,7 @@ class EventMaster:
         """
         f = open(configName, "r")
         line_list = [line for line in f]
-        camera_list = []
+        cameraList = []
 
         ACTIVE_CAMERAS_ID = self.str_to_camera_att(line_list, 1, 0)
 
@@ -61,14 +61,37 @@ class EventMaster:
         DETECTION_RATIO = self.str_to_camera_att(line_list, 29, 1)
 
         for i in range(len(ACTIVE_CAMERAS_ID)):
-            camera_list.append(Camera(self.args, ACTIVE_CAMERAS_ID[i], EVENT_TYPES[i], SECONDS_TO_START_EVENT[i], SIZE_OF_QUEUE[i],
+            cameraList.append(Camera(self.args, ACTIVE_CAMERAS_ID[i], EVENT_TYPES[i], SECONDS_TO_START_EVENT[i], SIZE_OF_QUEUE[i],
                                       TIMEOUT_AFTER_PUBLISH[i], TIME_TO_CLOSE[i], TIME_BETWEEN_EVENTS[i],
                                       WATCHMAN_TIME[i], MAX_SIZE_OF_MAN[i],
                                       MIN_SIZE_OF_MAN[i], START_INTREST_AREA_X[i], END_INTREST_AREA_X[i],
                                       START_INTREST_AREA_Y[i],
                                       END_INTREST_AREA_Y[i], DETECTION_RATIO[i]))
         f.close()
-        return camera_list
+        return cameraList
+
+    def read_camera_data_from_json(self):
+        """
+        :param configName: name of config file
+        :return: list of cameras with all the attributes.
+        """
+        cameraList = []
+
+        for i in range(len(self.args["camera_id"])):
+            cameraList.append(
+                Camera(self.args, self.args["camera_id"][i], self.args["event_in_camera"][i], self.args["Ts"][i],
+                       self.args["Nd"][i], self.args["Tf"][i], self.args["Tc"][i], self.args["Ti"][i],
+                       self.args["Tw"][i], self.args["Hmax"][i], self.args["Hmin"][i], self.args["Ar_x_start"][i],
+                       self.args["Ar_x_end"][i],
+                       self.args["Ar_y_start"][i], self.args["Ar_y_end"][i], self.args["Rh"][i], self.args["Pt"][i], self.args["Ta"][i], self.args["Na"][i]))
+        return cameraList
+
+    def load_configuration_from_json(self, jsonName):
+        self.args = json.loads(jsonName)
+        self.args["HOST"] = socket.gethostbyname(socket.gethostname())
+        self.args["ADDR"] = (self.args["SERVER"], self.args["PORT"])
+        return self.read_camera_data_from_json()
+
 
     def load_configuration(self, configName, jsonName):
         f = open(configName, "r")

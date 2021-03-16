@@ -2,7 +2,7 @@ import time
 
 class Camera:
     def __init__(self,args, id, intEventTypes, timeToPublish, queueSize, timeoutAfterPublish, timeToOpenAfterClose, timeBetweenEvents, timeForWatchman,
-                 maxSize, minSize, x_start, x_end, y_start, y_end, detectionRatio):
+                 maxSize, minSize, x_start, x_end, y_start, y_end, detectionRatio, TimeWithNoPerson, timeToPublishAnomly, queueSizeAnomaly):
         self.args = args
         self.id = id
         self.intEventTypes = intEventTypes
@@ -25,6 +25,9 @@ class Camera:
         self.timeoutCount = None
         self.lastDetectionInCamera = time.time()
         self.WatchmanStarted = False
+        self.TimeWithNoPerson = TimeWithNoPerson
+        self.timeToPublishAnomly = timeToPublishAnomly
+        self.queueSizeAnomaly = queueSizeAnomaly
 
     def __repr__(self):
         return (f"camera {self.id} event_type are: {self.eventTypes}")
