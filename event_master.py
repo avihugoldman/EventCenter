@@ -66,7 +66,7 @@ class EventMaster:
                                       WATCHMAN_TIME[i], MAX_SIZE_OF_MAN[i],
                                       MIN_SIZE_OF_MAN[i], START_INTREST_AREA_X[i], END_INTREST_AREA_X[i],
                                       START_INTREST_AREA_Y[i],
-                                      END_INTREST_AREA_Y[i], DETECTION_RATIO[i]))
+                                      END_INTREST_AREA_Y[i], DETECTION_RATIO[i], DETECTION_RATIO[i], DETECTION_RATIO[i], DETECTION_RATIO[i]))
         f.close()
         return cameraList
 
@@ -87,7 +87,9 @@ class EventMaster:
         return cameraList
 
     def load_configuration_from_json(self, jsonName):
-        self.args = json.loads(jsonName)
+        #self.args = json.loads(jsonName)
+        with open(jsonName, "r") as read_file:
+            self.args = json.load(read_file)
         self.args["HOST"] = socket.gethostbyname(socket.gethostname())
         self.args["ADDR"] = (self.args["SERVER"], self.args["PORT"])
         return self.read_camera_data_from_json()

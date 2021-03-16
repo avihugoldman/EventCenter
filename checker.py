@@ -6,6 +6,9 @@ class Checker(Event):
         super().__init__(args, type, cameraId)
         self.eventType = type
         self.cameraId = cameraId
+        self.eventInCamera = False
+        self.eventInCamera = False
+        self.eventInCamera = False
 
     def isTimePassedFromLastEvent(self, camera):
         if camera.timeoutCount is not None:

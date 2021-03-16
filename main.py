@@ -13,7 +13,7 @@ if __name__ == '__main__':
 
     #camList = em.load_configuration("config.txt", "data_config.json")
 
-    camList = em.load_configuration_from_json(data_JSON)
+    camList = em.load_configuration_from_json("data_config.json")
 
     print(camList)
 
