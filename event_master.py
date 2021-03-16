@@ -183,7 +183,7 @@ class EventMaster:
                     currChecker.isEventInCamera(currDetection.eventType, camList[currDetection.cameraId].eventTypes)
                     lastEventCheck = currChecker
                     lastEventCheck.isTimePassedFromLastEvent(camList[currDetection.originalCameraId])
-                    checkList = [currChecker.boundaries, currChecker.timeFromLastClosed, currChecker.eventInCamera)
+                    checkList = [currChecker.boundaries, currChecker.timeFromLastClosed, currChecker.eventInCamera]
                     if not all(checkList):
                         print(f"fail: boundaries: {currChecker.boundaries} timeFromLastClosed: {currChecker.timeFromLastClosed} eventInCamera: {currChecker.eventInCamera}")
                         break
