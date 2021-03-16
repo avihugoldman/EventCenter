@@ -1,8 +1,13 @@
 from event_master import EventMaster
-from runType import runType
 from test import Test
+import argparse
+parser = argparse.ArgumentParser(prog="Detector App", description="Starting Captain's Eye Detector Main Algorithm App! ")
+parser.add_argument('-t', '--type', required=True, default="config.json", help='config file')
 
 if __name__ == '__main__':
+
+    args = parser.parse_args()
+
     em = EventMaster()
 
     camList = em.load_configuration("config.txt", "data_config.json")
@@ -10,20 +15,22 @@ if __name__ == '__main__':
     for camera in camList:
         camera.convertEventIntToSTR()
 
-    rt = runType()
 
-    if rt == -1:
+    if args.type == "Q":
         exit(0)
 
-    elif rt == 10:
-        test = Test("PERSONS")
-        test.start_test()
+    elif args.type == "T":
+        test = Test("T")
+        test.start_test("SMOKE")
 
-    elif rt == 11 or rt == 12:
-        test = Test("SMOKE")
-        test.start_test()
+    elif args.type == "A":
+        em.runAsServer(camList)
 
-    else:
+    elif args.type == "P":
         sock = em.open_socket()
-        em.run(camList, sock)
+        em.runAsClient(camList, sock)
+
+    elif args.type == "S":
+        sock = em.open_socket()
+        em.runAsClient(camList, sock)
 
