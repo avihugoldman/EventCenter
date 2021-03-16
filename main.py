@@ -29,9 +29,9 @@ if __name__ == '__main__':
 
     elif args.type == "P":
         sock = em.open_socket()
-        em.runAsClient(camList, sock)
+        em.runAsClient(camList, sock, "p")
 
     elif args.type == "S":
         sock = em.open_socket()
-        em.runAsClient(camList, sock)
+        em.runAsClient(camList, sock, "s")
 

@@ -166,9 +166,12 @@ class EventMaster:
                     currEvent = Event(self.args, currDetection.cameraId, "PPE_HELMET")
                 eventList = currEvent.handle_detection(currEvent, currDetection, camList, eventList, personEventList)
 
-    def runAsClient(self, camList, sock):
+    def runAsClient(self, camList, sock, type):
         eventList = []
         personEventList = Queue(maxsize=100)
+        if type == "s":
+            self.args["SMOKE"] = 1
+            self.args["PERSONS"] = 8
         while True:
             list_of_strings = sock.handle_massage()
             for string in list_of_strings:
