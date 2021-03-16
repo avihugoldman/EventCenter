@@ -1,6 +1,5 @@
 from event_master import EventMaster
 from test import Test
-from config import data_JSON
 import argparse
 parser = argparse.ArgumentParser(prog="Detector App", description="Starting Captain's Eye Detector Main Algorithm App! ")
 parser.add_argument('-t', '--type', required=True, default="config.json", help='config file')

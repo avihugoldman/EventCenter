@@ -86,7 +86,6 @@ class Event(Detection):
         if event in eventList:
             flag = False
             curr = eventList[eventList.index(event)]
-            #event.id = 1
             curr.addObjectToList(detection.subClass, camList[curr.originalCameraId].queueSize)
             #curr.realDetectionLIst = self.addObjectToList([], camList[curr.id].queueSize)
             curr.lastUpdate = time.time()

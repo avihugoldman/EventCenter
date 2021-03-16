@@ -32,7 +32,7 @@ class EventMaster:
 
         ACTIVE_CAMERAS_ID = self.str_to_camera_att(line_list, 1, 0)
 
-        EVENT_TYPES = self.str_to_camera_att(line_list, 3, 5)
+        EVENT_TYPES = self.str_to_camera_att(line_list, 3, 2)
 
         SECONDS_TO_START_EVENT = self.str_to_camera_att(line_list, 5, 0)
 
@@ -94,7 +94,6 @@ class EventMaster:
         self.args["ADDR"] = (self.args["SERVER"], self.args["PORT"])
         return self.read_camera_data_from_json()
 
-
     def load_configuration(self, configName, jsonName):
         f = open(configName, "r")
         #self.args = json.load(jsonName)
@@ -117,12 +116,12 @@ class EventMaster:
     def str_to_camera_att(self, att, listNumber, type):
         tmpStr = str(att[listNumber])
         tmpList = tmpStr.split()
-        try:
-            if type == 0:
-                tmpList = [int(num) for num in tmpList]
-            else:
-                tmpList = [float(num) for num in tmpList]
-        except ValueError:
+        if type == 0:
+            tmpList = [int(num) for num in tmpList]
+        elif type == 1:
+            tmpList = [float(num) for num in tmpList]
+        elif type == 2:
+            tmpList = [string[0] for string in tmpList]
             tmpList = [string.split(",") for string in tmpList]
         return tmpList
 
@@ -166,7 +165,6 @@ class EventMaster:
                     currEvent = Event(self.args, currDetection.cameraId, "PPE_HELMET")
                 eventList = currEvent.handle_detection(currEvent, currDetection, camList, eventList, personEventList)
 
-
     def runAsClient(self, camList, sock):
         eventList = []
         while True:
@@ -181,15 +179,15 @@ class EventMaster:
                     currDetection.encode(str_list)
                     currDetection.cameraId = camList[int(currDetection.originalCameraId)].id
                     currChecker = Checker(self.args, currDetection.eventType, currDetection.cameraId)
-                    boundariesCheck = currChecker.checkBoundaries(camList[currDetection.cameraId], currDetection)
+                    currChecker.checkBoundaries(camList[currDetection.cameraId], currDetection)
                     currChecker.isEventInCamera(currDetection.eventType, camList[currDetection.cameraId].eventTypes)
                     lastEventCheck = currChecker
                     lastEventCheck.isTimePassedFromLastEvent(camList[currDetection.originalCameraId])
-                    # if not currDetection.eventType or not boundariesCheck or not lastEventCheck:
-                    if not lastEventCheck:
-                        print(f"fail: {currDetection.eventType, boundariesCheck, lastEventCheck}")
+                    checkList = [currChecker.boundaries, currChecker.timeFromLastClosed, currChecker.eventInCamera)
+                    if not all(checkList):
+                        print(f"fail: boundaries: {currChecker.boundaries} timeFromLastClosed: {currChecker.timeFromLastClosed} eventInCamera: {currChecker.eventInCamera}")
                         break
-                    currDetection.x, currDetection.y = boundariesCheck
+                    currDetection.x, currDetection.y = currChecker.x, currChecker.y
                     camList[currDetection.cameraId].lastDetectionInCamera = time.time()
                     if currDetection.eventType != "PERSONS":
                         currEvent = Event(self.args, currDetection.cameraId, currDetection.eventType)

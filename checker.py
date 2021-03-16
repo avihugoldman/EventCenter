@@ -6,15 +6,14 @@ class Checker(Event):
         super().__init__(args, type, cameraId)
         self.eventType = type
         self.cameraId = cameraId
-        self.eventInCamera = False
-        self.eventInCamera = False
-        self.eventInCamera = False
+        self.eventInCamera = True
+        self.timeFromLastClosed = True
+        self.boundaries = True
 
     def isTimePassedFromLastEvent(self, camera):
         if camera.timeoutCount is not None:
             if time.time() - camera.timeoutCount < camera.timeToOpenAfterClose:
-                return None
-        return self
+                self.timeFromLastClosed = False
 
     def isEventInCamera(self, event, eventsInCamera):
         if event == "PERSONS":
@@ -25,11 +24,11 @@ class Checker(Event):
             elif "NO_HELMET" in eventsInCamera:
                 self.eventType = "NO_HELMET"
             else:
-                return False
+                self.eventInCamera = False
         else:
             if event in eventsInCamera:
                 self.eventType = event
-            return False
+            self.eventInCamera = False
 
     def checkBoundaries(self, camera, detection):
         detection_x_start = detection.x[0][0]
@@ -46,9 +45,9 @@ class Checker(Event):
             # print("off limits!")
             detection.x[0][1] = camera.x_end
         if abs(detection.x[0][1] - detection.x[0][0]) <= 0.01:
-            return False
+            self.boundaries = False
         if detection_y_size < camera.minSize or detection_y_size > camera.maxSize and detection.eventType == "PERSONS":
-            return False
+            self.boundaries = False
         if detection_y_start < float(camera.y_start):
             # print("off limits!")
             detection.y[0][0] = camera.y_start
@@ -57,7 +56,7 @@ class Checker(Event):
             detection.y[0][1] = camera.y_end
         if abs(detection.y[0][1] - detection.y[0][0]) <= 0.01:
             # print("problem")
-            return False
+            self.boundaries = False
         detection_x_start = detection.x[0][0]
         detection_x_end = detection.x[0][1]
         detection_x_size = detection_x_end - detection_x_start
@@ -66,8 +65,8 @@ class Checker(Event):
         detection_y_size = detection_y_end - detection_y_start
         newDetectionTotalArea = detection_x_size * detection_y_size
         if newDetectionTotalArea / detectionTotalArea < 0.8:
-            return False
-        return detection.x, detection.y
+            self.boundaries = False
+        self.x, self.y = detection.x, detection.y
 
     # def isItRealDetection(self, detection_queue):
     #     event_happening_counter = 0
