@@ -1,5 +1,6 @@
 import socket
 import threading
+import pickle
 
 
 class OpenSocket:
@@ -15,7 +16,7 @@ class OpenSocket:
         while conn:
             data = conn.recv(1024).decode()
             if data:  # SEND ONLY WHEN NEW INFO IS RECEIVED
-                self.currMassage = data
+                self.currMassage = pickle.loads(data)
                 #if self.args["DEBUG"]:
                     #print(data)
             else:
