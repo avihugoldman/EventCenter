@@ -199,10 +199,13 @@ class EventMaster:
                     camList[currDetection.originalCameraId].lastDetectionInCamera = time.time()
                     if currDetection.eventType != "PERSONS":
                         currEvent = Event(self.args, currDetection.cameraId, currDetection.eventType)
+                        eventList = currEvent.handle_detection(currEvent, currDetection, camList, eventList,
+                                                               personEventList)
                     else:
                         currEvent = Event(self.args, currDetection.cameraId, "NO_CROSS_ZONE")
                         eventList = currEvent.handle_detection(currEvent, currDetection, camList, eventList,
                                                                personEventList)
-                        currEvent = Event(self.args, currDetection.cameraId, "PPE_HELMET")
-                    eventList = currEvent.handle_detection(currEvent, currDetection, camList, eventList,
+                        if "PPE_HELMET" in camList[currDetection.originalCameraId].eventTypes:
+                            currEvent = Event(self.args, currDetection.cameraId, "PPE_HELMET")
+                            eventList = currEvent.handle_detection(currEvent, currDetection, camList, eventList,
                                                            personEventList)
