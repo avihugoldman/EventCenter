@@ -138,7 +138,6 @@ class EventMaster:
         counter = 0
         while True:
             counter += 1
-            #str_list = server.currMassage.split("/")
             str_list = server.currMassage
             if not server.currMassage:
                 continue

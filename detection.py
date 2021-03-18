@@ -52,18 +52,6 @@ class Detection:
         else:
             return None
 
-    def covertStrToFloatList(self, str_object):
-        temp_list = []
-        list_object = []
-        str_object = str_object.strip("[ ]")
-        str_object = str_object.split(", ")
-        str_object = [i.split(",") for i in str_object]
-        for lst in str_object:
-            for num in lst:
-                temp_list.append(float(num))
-            list_object.append(temp_list)
-        return list_object
-
     def covertStrToFloatListYoav(self, str_object):
         temp_list = []
         list_object = []
@@ -73,8 +61,7 @@ class Detection:
         for lst in str_object:
             for num in lst:
                 temp_list.append(float(num))
-            list_object.append(temp_list)
-        return list_object
+        return temp_list
 
 
 

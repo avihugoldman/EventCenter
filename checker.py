@@ -31,37 +31,37 @@ class Checker(Event):
             self.eventInCamera = False
 
     def checkBoundaries(self, camera, detection):
-        detection_x_start = detection.x[0][0]
-        detection_x_end = detection.x[0][1]
+        detection_x_start = detection.x[0]
+        detection_x_end = detection.x[1]
         detection_x_size = detection_x_end - detection_x_start
-        detection_y_start = detection.y[0][0]
-        detection_y_end = detection.y[0][1]
+        detection_y_start = detection.y[0]
+        detection_y_end = detection.y[1]
         detection_y_size = detection_y_end - detection_y_start
         detectionTotalArea = detection_x_size * detection_y_size
         if detection_x_start < float(camera.x_start):
             # print("off limits!")
-            detection.x[0][0] = camera.x_start
+            detection.x[0] = camera.x_start
         if detection_x_end > float(camera.x_end):
             # print("off limits!")
-            detection.x[0][1] = camera.x_end
-        if abs(detection.x[0][1] - detection.x[0][0]) <= 0.01:
+            detection.x[1] = camera.x_end
+        if abs(detection.x[1] - detection.x[0]) <= 0.01:
             self.boundaries = False
         if (detection_y_size < camera.minSize or detection_y_size > camera.maxSize) and detection.eventType == "PERSONS":
             self.boundaries = False
         if detection_y_start < float(camera.y_start):
             # print("off limits!")
-            detection.y[0][0] = camera.y_start
+            detection.y[0] = camera.y_start
         if detection_y_end > float(camera.y_end):
             # print("off limits!")
-            detection.y[0][1] = camera.y_end
-        if abs(detection.y[0][1] - detection.y[0][0]) <= 0.01:
+            detection.y[1] = camera.y_end
+        if abs(detection.y[1] - detection.y[0]) <= 0.01:
             # print("problem")
             self.boundaries = False
-        detection_x_start = detection.x[0][0]
-        detection_x_end = detection.x[0][1]
+        detection_x_start = detection.x[0]
+        detection_x_end = detection.x[1]
         detection_x_size = detection_x_end - detection_x_start
-        detection_y_start = detection.y[0][0]
-        detection_y_end = detection.y[0][1]
+        detection_y_start = detection.y[0]
+        detection_y_end = detection.y[1]
         detection_y_size = detection_y_end - detection_y_start
         newDetectionTotalArea = detection_x_size * detection_y_size
         if newDetectionTotalArea / detectionTotalArea < 0.8:
