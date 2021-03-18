@@ -87,7 +87,6 @@ class EventMaster:
         return cameraList
 
     def load_configuration_from_json(self, jsonName):
-        #self.args = json.loads(jsonName)
         with open(jsonName, "r") as read_file:
             self.args = json.load(read_file)
         self.args["HOST"] = socket.gethostbyname(socket.gethostname())
@@ -96,7 +95,6 @@ class EventMaster:
 
     def load_configuration(self, configName, jsonName):
         f = open(configName, "r")
-        #self.args = json.load(jsonName)
         line_list = [line for line in f]
         with open(jsonName, "r") as read_file:
             self.args = json.load(read_file)
