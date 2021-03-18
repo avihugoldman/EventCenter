@@ -30,7 +30,7 @@ class Camera:
         self.TimeWithNoPerson = TimeWithNoPerson
         self.timeToPublishAnomly = timeToPublishAnomly
         self.queueSizeAnomaly = queueSizeAnomaly
-        self.personQueue = Queue(maxsize=20)
+        self.personEventsList = Queue(maxsize=20)
         self.lastEventsInCamera = []
 
     def __repr__(self):

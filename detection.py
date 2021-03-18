@@ -26,10 +26,10 @@ class Detection:
         try:
             self.netName = str(string[7])
         except IndexError:
-            self.netName = "Smoke"
+            self.netName = "SMOKE"
         if self.netName == "SMOKE":
             self.x = self.covertStrToFloatListYoav(string[5])
-            self.x = self.covertStrToFloatListYoav(string[5])
+            self.y = self.covertStrToFloatListYoav(string[5])
         else:
             self.x = [float(f) for f in string[5]]
             self.y = [float(f) for f in string[6]]
@@ -61,7 +61,9 @@ class Detection:
         for lst in str_object:
             for num in lst:
                 temp_list.append(float(num))
-        return temp_list
+            list_object.append(temp_list)
+        return list_object[0]
+
 
 
 

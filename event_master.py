@@ -185,9 +185,9 @@ class EventMaster:
                     currDetection.encode(str_list)
                     currDetection.cameraId = camList[int(currDetection.originalCameraId)].id
                     if currDetection.eventType == "PERSONS":
-                        if camList[currDetection.originalCameraId].personEventList.full():
-                            camList[currDetection.originalCameraId].personEventList.get()
-                        camList[currDetection.originalCameraId].personEventList.put(currDetection)
+                        if camList[currDetection.originalCameraId].personEventsList.full():
+                            camList[currDetection.originalCameraId].personEventsList.get()
+                        camList[currDetection.originalCameraId].personEventsList.put(currDetection)
                     currChecker = Checker(self.args, currDetection.eventType, currDetection.cameraId)
                     currChecker.checkBoundaries(camList[currDetection.originalCameraId], currDetection)
                     currChecker.isEventInCamera(currDetection.eventType, camList[currDetection.originalCameraId].eventTypes)
