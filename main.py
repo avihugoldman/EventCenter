@@ -3,7 +3,7 @@ from test import Test
 import argparse
 parser = argparse.ArgumentParser(prog="Detector App", description="Starting Captain's Eye Detector Main Algorithm App! ")
 parser.add_argument('-t', '--type', required=True, default="config.json", help='config file')
-
+# check if can commit
 if __name__ == '__main__':
 
     args = parser.parse_args()
