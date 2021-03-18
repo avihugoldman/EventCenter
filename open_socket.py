@@ -9,14 +9,15 @@ class OpenSocket:
         self.serverName = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.host = self.args["HOST"]
         self.port = self.args["PORT"]
-        self.currMassage = str
+        self.currMassage = []
 
     def receive_massage(self, conn):
-
+        dict = {}
         while conn:
-            data = conn.recv(1024).decode()
+            data = conn.recv(1024)
             if data:  # SEND ONLY WHEN NEW INFO IS RECEIVED
                 self.currMassage = pickle.loads(data)
+                print(self.currMassage)
                 #if self.args["DEBUG"]:
                     #print(data)
             else:

@@ -140,7 +140,7 @@ class EventMaster:
             counter += 1
             #str_list = server.currMassage.split("/")
             str_list = server.currMassage
-            if len(str_list) == 1:
+            if not server.currMassage:
                 continue
             elif counter % 25 == 0:
                 currDetection = Detection(self.args)
