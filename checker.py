@@ -33,7 +33,7 @@ class Checker(Event):
 
     def isEventInCamera(self, event, eventsInCamera):
         if event == "PERSONS":
-            if "PPE_HELMET" in eventsInCamera and "NO_CROSS_ZONE" in eventsInCamera:
+            if "PPEHELMET" in eventsInCamera and "NO_CROSS_ZONE" in eventsInCamera:
                 return
             if "PPE_HELMET" not in eventsInCamera and "NO_CROSS_ZONE" in eventsInCamera:
                 self.eventType = "NO_CROSS_ZONE"
