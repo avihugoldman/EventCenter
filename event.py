@@ -201,6 +201,8 @@ class Event(Detection):
         self.id = eventId
         self.startTime, self.lastUpdate = time.time(), time.time()
         self.open = True
+        if len(camList[self.originalCameraId].lastEventInCamera) > 50:
+            camList[self.originalCameraId].lastEventInCamera.pop()
         camList[self.originalCameraId].lastEventInCamera.append(self)
 
     def publishShipEvent(self):
