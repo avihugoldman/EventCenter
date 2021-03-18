@@ -69,23 +69,23 @@ class Event(Detection):
                    # if time.time() - float(camera.timeoutCount) < camera.timeToOpenAfterClose:
                        # continue
                    if camera.timeoutCount is None:
-                       event.startShipEvent()
+                       event.originalCameraId = counter
+                       event.startShipEvent(camList)
                        camera.timeoutCount = None
                        camera.WatchmanStarted = True
                        if event.id:
                            event.publishShipEvent()
                            event.cameraId = camera.id
-                           event.originalCameraId = counter
                            listOfTotalEvents.append(event)
                    else:
                        if not time.time() - camera.timeoutCount < camera.timeToOpenAfterClose:
-                            event.startShipEvent()
+                            event.originalCameraId = counter
+                            event.startShipEvent(camList)
                             camera.timeoutCount = None
                             camera.WatchmanStarted = True
                             if event.id:
                                 event.publishShipEvent()
                                 event.cameraId = camera.id
-                                event.originalCameraId = counter
                                 listOfTotalEvents.append(event)
         return listOfTotalEvents
 
@@ -130,7 +130,8 @@ class Event(Detection):
         else:
             if event.eventType == "ANOMALY":
                 if personEventList.qsize() == 0:
-                    event.startShipEvent()
+                    event.originalCameraId = detection.originalCameraId
+                    event.startShipEvent(camList)
                     camList[detection.originalCameraId].timeoutCount = None
                     if event.id:
                         event.subClassList.append(detection.subClass)
@@ -138,18 +139,18 @@ class Event(Detection):
                         eventList.append(event)
             if event.eventType == "PPE_HELMET":
                 if detection.subClass == 2:
-                    event.startShipEvent()
+                    event.originalCameraId = detection.originalCameraId
+                    event.startShipEvent(camList)
                     camList[detection.originalCameraId].timeoutCount = None
                     if event.id:
                         event.subClassList.append(detection.subClass)
-                        event.originalCameraId = detection.originalCameraId
                         eventList.append(event)
             else:
-                event.startShipEvent()
+                event.originalCameraId = detection.originalCameraId
+                event.startShipEvent(camList)
                 camList[detection.originalCameraId].timeoutCount = None
                 if event.id:
                     event.subClassList.append(detection.subClass)
-                    event.originalCameraId = detection.originalCameraId
                     eventList.append(event)
         return eventList
 
@@ -158,7 +159,7 @@ class Event(Detection):
             self.subClassList.pop()
         self.subClassList.append(tempDetection)
 
-    def startShipEvent(self):
+    def startShipEvent(self, camList):
         eventId = None
         t = time.localtime()
         current_time = time.strftime("%H:%M:%S", t)
@@ -189,6 +190,7 @@ class Event(Detection):
         self.id = eventId
         self.startTime, self.lastUpdate = time.time(), time.time()
         self.open = True
+        camList[self.originalCameraId].lastEventInCamera.append(self)
 
     def publishShipEvent(self):
         t = time.localtime()
@@ -265,8 +267,8 @@ class Event(Detection):
                 logging.warning(f"Query failed to run by returning code of {request.status_code} in sendDetection")
         self.lastUpdate = time.time()
 
-    def fire_and_forget(self):
-        threading.Thread(target=self.sendDetection, args=()).start()
+    def fire_and_forget(self, camList):
+        threading.Thread(target=self.sendDetection, args=(camList)).start()
 
     def endShipEvent(self):
         time.sleep(0.05)

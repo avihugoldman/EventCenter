@@ -1,4 +1,6 @@
 import time
+from queue import Queue
+
 
 class Camera:
     def __init__(self,args, id, intEventTypes, timeToPublish, queueSize, timeoutAfterPublish, timeToOpenAfterClose, timeBetweenEvents, timeForWatchman,
@@ -28,6 +30,8 @@ class Camera:
         self.TimeWithNoPerson = TimeWithNoPerson
         self.timeToPublishAnomly = timeToPublishAnomly
         self.queueSizeAnomaly = queueSizeAnomaly
+        self.personQueue = Queue(maxsize=20)
+        self.lastEventsInCamera = []
 
     def __repr__(self):
         return (f"camera {self.id} event_type are: {self.eventTypes}")
