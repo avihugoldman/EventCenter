@@ -31,8 +31,8 @@ class Detection:
             self.x = self.covertStrToFloatListYoav(string[5])
             self.x = self.covertStrToFloatListYoav(string[5])
         else:
-            self.x = self.covertStrToFloatList(string[5])
-            self.y = self.covertStrToFloatList(string[6])
+            self.x = [float(f) for f in string[5]]
+            self.y = [float(f) for f in string[6]]
 
     def convertEventIntToSTR(self, event_type):
         if event_type == self.args["PERSONS"]:
