@@ -228,6 +228,7 @@ class Event(Detection):
         camList[self.originalCameraId].lastEventsInCamera.append(self)
 
     def sendDetection(self):
+        print(self)
         if self.x and self.y:
             num_objects = len(self.x)
             if num_objects <= 0:
