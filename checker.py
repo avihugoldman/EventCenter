@@ -47,7 +47,8 @@ class Checker(Event):
         else:
             if event in eventsInCamera:
                 self.eventType = event
-            self.eventInCamera = False
+            else:
+                self.eventInCamera = False
 
     def checkBoundaries(self, camera, detection):
         detection_x_start = detection.x[0]

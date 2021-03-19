@@ -41,7 +41,7 @@ class Detection:
             return "NO_CROSS_ZONE"
         elif event_type == self.args["PPE_HELMET"]:
             return "PPE_HELMET"
-        elif event_type == self.args["SMOKE_AND_LEAKAGE"]:
+        elif event_type == self.args["SMOKE"]:
             return "SMOKE"
         elif event_type == self.args["WATCH_MAN_ALERT"]:
             return "WATCHMAN"
