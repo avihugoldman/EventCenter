@@ -189,9 +189,9 @@ class EventMaster:
                             camList[currDetection.originalCameraId].personEventsList.get()
                         camList[currDetection.originalCameraId].personEventsList.put(currDetection)
                     currChecker = Checker(self.args, currDetection.eventType, currDetection.cameraId)
+                    currChecker.isTimePassedFromLastEvent(camList[currDetection.originalCameraId])
                     currChecker.checkBoundaries(camList[currDetection.originalCameraId], currDetection)
                     currChecker.isEventInCamera(currDetection.eventType, camList[currDetection.originalCameraId].eventTypes)
-                    currChecker.isTimePassedFromLastEvent(camList[currDetection.originalCameraId])
                     checkList = [currChecker.boundaries, currChecker.timeFromLastClosed, currChecker.eventInCamera]
                     if not all(checkList):
                         #print(f"fail: boundaries: {currChecker.boundaries} timeFromLastClosed: {currChecker.timeFromLastClosed} eventInCamera: {currChecker.eventInCamera}")

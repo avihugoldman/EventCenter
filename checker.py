@@ -11,7 +11,7 @@ class Checker(Event):
         self.boundaries = True
 
     def isTimePassedFromLastEvent(self, camera):
-        if camera.lastEventsInCamera:
+        if len(camera.lastEventsInCamera) > 0:
             if self.eventType != "PERSONS":
                 tempList = [event for event in camera.lastEventsInCamera if event.eventType == self.eventType and not event.open]
                 for event in tempList:
@@ -25,11 +25,14 @@ class Checker(Event):
                         self.timeFromLastClosed = False
 
     def isTimePassedFromLastHelmetEvent(self, camera):
-        if camera.lastEventsInCamera:
+        flag = True
+        if len(camera.lastEventsInCamera) > 0:
             tempList = [event for event in camera.lastEventsInCamera if event.eventType == "PPE_HELMET" and not event.open]
-            for event in tempList:
-                if time.time() - event.closedTime < camera.timeToOpenAfterClose:
-                    self.timeFromLastClosed = False
+            if len(tempList) > 0:
+                for event in tempList:
+                    if time.time() - event.closedTime < camera.timeToOpenAfterClose:
+                        return False
+        return True
 
     def isEventInCamera(self, event, eventsInCamera):
         if event == "PERSONS":

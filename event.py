@@ -201,9 +201,9 @@ class Event(Detection):
         self.id = eventId
         self.startTime, self.lastUpdate = time.time(), time.time()
         self.open = True
-        if len(camList[self.originalCameraId].lastEventInCamera) > 50:
-            camList[self.originalCameraId].lastEventInCamera.pop()
-        camList[self.originalCameraId].lastEventInCamera.append(self)
+        if len(camList[self.originalCameraId].lastEventsInCamera) > 50:
+            camList[self.originalCameraId].lastEventsInCamera.pop()
+        camList[self.originalCameraId].lastEventsInCamera.append(self)
 
     def publishShipEvent(self):
         t = time.localtime()
@@ -237,11 +237,10 @@ class Event(Detection):
                 empty_rect_str = "{x1:%0.3f, y1:%0.3f x2:%0.3f, y2:%0.3f}" % (
                     0, 0, 0, 0)
                 all_rects_str += empty_rect_str
-            for i in range(num_objects):
                 rect_str = "{x1:%0.3f, y1:%0.3f x2:%0.3f, y2:%0.3f}" % (
-                    self.x[i][0],
-                    self.y[i][0], self.x[i][1],
-                    self.y[i][1])
+                self.x[0],
+                self.y[0], self.x[1],
+                self.y[1])
                 all_rects_str += rect_str
             string_to_send = """
                mutation{
@@ -280,8 +279,8 @@ class Event(Detection):
                 logging.warning(f"Query failed to run by returning code of {request.status_code} in sendDetection")
         self.lastUpdate = time.time()
 
-    def fire_and_forget(self, camList):
-        threading.Thread(target=self.sendDetection, args=(camList)).start()
+    def fire_and_forget(self):
+        threading.Thread(target=self.sendDetection, args=()).start()
 
     def endShipEvent(self):
         time.sleep(0.05)
