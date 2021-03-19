@@ -70,21 +70,21 @@ class Event(Detection):
                        # continue
                    if camera.timeoutCount is None:
                        event.originalCameraId = counter
-                       event.startShipEvent(camList)
+                       event.startShipEvent()
                        camera.timeoutCount = None
                        camera.WatchmanStarted = True
                        if event.id:
-                           event.publishShipEvent()
+                           event.publishShipEvent(camList)
                            event.cameraId = camera.id
                            listOfTotalEvents.append(event)
                    else:
                        if not time.time() - camera.timeoutCount < camera.timeToOpenAfterClose:
                             event.originalCameraId = counter
-                            event.startShipEvent(camList)
+                            event.startShipEvent()
                             camera.timeoutCount = None
                             camera.WatchmanStarted = True
                             if event.id:
-                                event.publishShipEvent()
+                                event.publishShipEvent(camList)
                                 event.cameraId = camera.id
                                 listOfTotalEvents.append(event)
         return listOfTotalEvents
@@ -114,7 +114,7 @@ class Event(Detection):
                                 if self.args["DEBUG"]:
                                     print(f"event {curr.id} has been sent in time {time.time()} in camera {self.cameraId}")
                             else:
-                                curr.publishShipEvent()
+                                curr.publishShipEvent(camList)
                                 if self.args["DEBUG"]:
                                     print(f"NO_CROSS_ZONE event published in camera {self.cameraId} in time {time.time()}")
                     else:
@@ -124,14 +124,14 @@ class Event(Detection):
                                 if self.args["DEBUG"]:
                                     print(f"event {curr.id} has been sent in time {time.time()} in camera {self.cameraId}")
                             else:
-                                curr.publishShipEvent()
+                                curr.publishShipEvent(camList)
                                 if self.args["DEBUG"]:
                                     print(f"NO_CROSS_ZONE event published in camera {self.cameraId} in time {time.time()}")
         else:
             if event.eventType == "ANOMALY":
                 if camList[detection.originalCameraId].personEventList.qsize() == 0:
                     event.originalCameraId = detection.originalCameraId
-                    event.startShipEvent(camList)
+                    event.startShipEvent()
                     camList[detection.originalCameraId].timeoutCount = None
                     if event.id:
                         event.subClassList.append(detection.subClass)
@@ -142,7 +142,7 @@ class Event(Detection):
                         return eventList
                     else:
                         event.originalCameraId = detection.originalCameraId
-                        event.startShipEvent(camList)
+                        event.startShipEvent()
                         camList[detection.originalCameraId].timeoutCount = None
                         if event.id:
                             event.subClassList.append(detection.subClass)
@@ -151,14 +151,14 @@ class Event(Detection):
             if event.eventType == "PPE_HELMET":
                 if detection.subClass == 2:
                     event.originalCameraId = detection.originalCameraId
-                    event.startShipEvent(camList)
+                    event.startShipEvent()
                     camList[detection.originalCameraId].timeoutCount = None
                     if event.id:
                         event.subClassList.append(detection.subClass)
                         eventList.append(event)
             else:
                 event.originalCameraId = detection.originalCameraId
-                event.startShipEvent(camList)
+                event.startShipEvent()
                 camList[detection.originalCameraId].timeoutCount = None
                 if event.id:
                     event.subClassList.append(detection.subClass)
@@ -170,7 +170,7 @@ class Event(Detection):
             self.subClassList.pop()
         self.subClassList.append(tempDetection)
 
-    def startShipEvent(self, camList):
+    def startShipEvent(self):
         eventId = None
         t = time.localtime()
         current_time = time.strftime("%H:%M:%S", t)
@@ -201,11 +201,8 @@ class Event(Detection):
         self.id = eventId
         self.startTime, self.lastUpdate = time.time(), time.time()
         self.open = True
-        if len(camList[self.originalCameraId].lastEventsInCamera) > 50:
-            camList[self.originalCameraId].lastEventsInCamera.pop()
-        camList[self.originalCameraId].lastEventsInCamera.append(self)
 
-    def publishShipEvent(self):
+    def publishShipEvent(self, camList):
         t = time.localtime()
         current_time = time.strftime("%H:%M:%S", t)
         string_to_send = """
@@ -226,6 +223,9 @@ class Event(Detection):
         self.lastUpdate = time.time()
         self.published = True
         self.publishedTime = time.time()
+        if len(camList[self.originalCameraId].lastEventsInCamera) > 50:
+            camList[self.originalCameraId].lastEventsInCamera.pop()
+        camList[self.originalCameraId].lastEventsInCamera.append(self)
 
     def sendDetection(self):
         if self.x and self.y:
