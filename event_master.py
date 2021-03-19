@@ -183,6 +183,7 @@ class EventMaster:
                 else:
                     currDetection = Detection(self.args)
                     currDetection.encode(str_list)
+                    #print(currDetection)
                     currDetection.cameraId = camList[int(currDetection.originalCameraId)].id
                     if currDetection.eventType == "PERSONS":
                         if camList[currDetection.originalCameraId].personEventsList.full():

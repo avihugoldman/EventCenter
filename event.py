@@ -103,7 +103,7 @@ class Event(Detection):
                 if time_diff > camList[curr.originalCameraId].timeToPublish:
                     flag = True
             else:
-                if time_diff > camList[curr.originalCameraId].timeToPublish:
+                if time_diff > camList[curr.originalCameraId].timeToPublish: #ready for new parmeter for anomaly
                     flag = True
             if flag:
                 if len(curr.subClassList) >= camList[curr.originalCameraId].queueSize:
@@ -228,7 +228,6 @@ class Event(Detection):
         camList[self.originalCameraId].lastEventsInCamera.append(self)
 
     def sendDetection(self):
-        print(self)
         if self.x and self.y:
             num_objects = len(self.x)
             if num_objects <= 0:
@@ -271,7 +270,7 @@ class Event(Detection):
                        x1, y1, x2, y2
                      }
                    }
-               }""" % (self.id)
+               }""" % (self.id, self.serialId)
         if self.args["DEBUG"]:
             logging.debug(string_to_send)
         request = requests.post(self.args["URL"], json={'query': string_to_send})
@@ -313,7 +312,7 @@ class Event(Detection):
     def isItRealDetection(self, detection_queue):
         event_happening_counter = 0
         for detection in detection_queue:
-            if detection:
+            if detection != None:
                 event_happening_counter += 1
             else:
                 continue
