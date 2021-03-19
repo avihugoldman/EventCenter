@@ -257,6 +257,7 @@ class Event(Detection):
                    }
                    }""" % (self.id, self.serialId, all_rects_str)
         else:
+            tempSerialId = 1
             string_to_send = """
                mutation
                {
@@ -270,7 +271,7 @@ class Event(Detection):
                        x1, y1, x2, y2
                      }
                    }
-               }""" % (self.id, self.serialId)
+               }""" % (self.id, tempSerialId)
         if self.args["DEBUG"]:
             logging.debug(string_to_send)
         request = requests.post(self.args["URL"], json={'query': string_to_send})
