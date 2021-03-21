@@ -139,14 +139,14 @@ class EventMaster:
             if not server.currMassage:
                 tempEvent = Event(self.args, -1, -1)
                 eventList = tempEvent.handle_no_detction(camList, eventList)
-            elif counter % 25 == 0:
+            elif counter % 25 == 0: # Only for Anomaly network
                 currDetection = Detection(self.args)
                 currDetection.encode(str_list)
                 currDetection.cameraId = camList[int(currDetection.originalCameraId)].id
                 currChecker = Checker(self.args, currDetection.eventType, currDetection.cameraId)
+                currChecker.isTimePassedFromLastEvent(camList[currDetection.originalCameraId])
                 currChecker.checkBoundaries(camList[currDetection.originalCameraId], currDetection)
                 currChecker.isEventInCamera(currDetection.eventType, camList[currDetection.originalCameraId].eventTypes)
-                currChecker.isTimePassedFromLastEvent(camList[currDetection.originalCameraId])
                 checkList = [currChecker.boundaries, currChecker.timeFromLastClosed, currChecker.eventInCamera]
                 #print(currDetection)
                 if currDetection.eventType == "PERSONS":
@@ -164,7 +164,9 @@ class EventMaster:
                 else:
                     currEvent = Event(self.args, currDetection.cameraId, "NO_CROSS_ZONE")
                     eventList = currEvent.handle_detection(currEvent, currDetection, camList, eventList)
-                    if "PPE_HELMET" in camList[currDetection.originalCameraId].eventTypes and currChecker.isTimePassedFromLastHelmetEvent(camList[currDetection.originalCameraId]):
+                    if "PPE_HELMET" in camList[
+                        currDetection.originalCameraId].eventTypes and currChecker.isTimePassedFromLastHelmetEvent(
+                        camList[currDetection.originalCameraId]):
                         currEvent = Event(self.args, currDetection.cameraId, "PPE_HELMET")
                         eventList = currEvent.handle_detection(currEvent, currDetection, camList, eventList)
 
