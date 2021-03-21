@@ -119,3 +119,10 @@ class Checker(Event):
     #     if (event_happening_counter) > score:
     #         return True
     #     return False
+
+    def checkDeadMan(self):
+        pass
+        # get pos vector in size of VECTOR_SIZE (numpy vector or list of floats) from yoav
+        # make histogram on the last 30 frames.
+        # checks if 90% of changes are in the same 10% of bins.
+        # sends Dead man event
