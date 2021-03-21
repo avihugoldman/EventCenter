@@ -40,7 +40,7 @@ class Event(Detection):
                 camList[obj.originalCameraId].timeoutCount = time.time()
                 break
             if obj.eventType == "WATCHMAN" and camList[obj.originalCameraId].personEventList.notempty():
-                if camList[obj.originalCameraId].personEventList.get().updateTime - obj.startTime > 0 :
+                if camList[obj.originalCameraId].personEventList.get().updateTime - obj.startTime > 0:
                     obj.endShipEvent()
                     listOfTotalEvents.remove(obj)
                     camList[obj.originalCameraId].timeoutCount = time.time()
@@ -71,7 +71,7 @@ class Event(Detection):
                    if camera.timeoutCount is None:
                        event.originalCameraId = counter
                        event.startShipEvent()
-                       camera.timeoutCount = None
+                       camera.timeoutCount = time.time()
                        camera.WatchmanStarted = True
                        if event.id:
                            event.publishShipEvent(camList)
@@ -81,7 +81,7 @@ class Event(Detection):
                        if not time.time() - camera.timeoutCount < camera.timeToOpenAfterClose:
                             event.originalCameraId = counter
                             event.startShipEvent()
-                            camera.timeoutCount = None
+                            camera.timeoutCount = time.time()
                             camera.WatchmanStarted = True
                             if event.id:
                                 event.publishShipEvent(camList)
@@ -132,7 +132,7 @@ class Event(Detection):
                 if camList[detection.originalCameraId].personEventList.qsize() == 0:
                     event.originalCameraId = detection.originalCameraId
                     event.startShipEvent()
-                    camList[detection.originalCameraId].timeoutCount = None
+                    #camList[detection.originalCameraId].timeoutCount = None
                     if event.id:
                         event.subClassList.append(detection.subClass)
                         event.originalCameraId = detection.originalCameraId
@@ -143,7 +143,7 @@ class Event(Detection):
                     else:
                         event.originalCameraId = detection.originalCameraId
                         event.startShipEvent()
-                        camList[detection.originalCameraId].timeoutCount = None
+                        #camList[detection.originalCameraId].timeoutCount = None
                         if event.id:
                             event.subClassList.append(detection.subClass)
                             event.originalCameraId = detection.originalCameraId
@@ -152,14 +152,14 @@ class Event(Detection):
                 if detection.subClass == 2:
                     event.originalCameraId = detection.originalCameraId
                     event.startShipEvent()
-                    camList[detection.originalCameraId].timeoutCount = None
+                    #camList[detection.originalCameraId].timeoutCount = None
                     if event.id:
                         event.subClassList.append(detection.subClass)
                         eventList.append(event)
             else:
                 event.originalCameraId = detection.originalCameraId
                 event.startShipEvent()
-                camList[detection.originalCameraId].timeoutCount = None
+                #camList[detection.originalCameraId].timeoutCount = None
                 if event.id:
                     event.subClassList.append(detection.subClass)
                     eventList.append(event)
