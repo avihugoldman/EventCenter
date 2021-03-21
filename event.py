@@ -39,7 +39,7 @@ class Event(Detection):
                 listOfTotalEvents.remove(obj)
                 camList[obj.originalCameraId].timeoutCount = time.time()
                 break
-            if obj.eventType == "WATCHMAN" and camList[obj.originalCameraId].personEventList.notempty():
+            if obj.eventType == "WATCHMAN" and camList[obj.originalCameraId].personEventList.notempty():#
                 if camList[obj.originalCameraId].personEventList.get().updateTime - obj.startTime > 0:
                     obj.endShipEvent()
                     listOfTotalEvents.remove(obj)
