@@ -142,7 +142,10 @@ class EventMaster:
             elif counter % 25 == 0: # Only for Anomaly network
                 currDetection = Detection(self.args)
                 currDetection.encode(str_list)
-                currDetection.cameraId = camList[int(currDetection.originalCameraId)].id
+                try:
+                    currDetection.cameraId = camList[int(currDetection.originalCameraId)].id
+                except IndexError:
+                    continue
                 currChecker = Checker(self.args, currDetection.eventType, currDetection.cameraId)
                 currChecker.isTimePassedFromLastEvent(camList[currDetection.originalCameraId])
                 currChecker.checkBoundaries(camList[currDetection.originalCameraId], currDetection)
@@ -164,8 +167,7 @@ class EventMaster:
                 else:
                     currEvent = Event(self.args, currDetection.cameraId, "NO_CROSS_ZONE")
                     eventList = currEvent.handle_detection(currEvent, currDetection, camList, eventList)
-                    if "PPE_HELMET" in camList[
-                        currDetection.originalCameraId].eventTypes and currChecker.isTimePassedFromLastHelmetEvent(
+                    if "PPE_HELMET" in camList[currDetection.originalCameraId].eventTypes and currChecker.isTimePassedFromLastHelmetEvent(
                         camList[currDetection.originalCameraId]):
                         currEvent = Event(self.args, currDetection.cameraId, "PPE_HELMET")
                         eventList = currEvent.handle_detection(currEvent, currDetection, camList, eventList)
@@ -186,7 +188,10 @@ class EventMaster:
                     currDetection = Detection(self.args)
                     currDetection.encode(str_list)
                     #print(currDetection)
-                    currDetection.cameraId = camList[int(currDetection.originalCameraId)].id
+                    try:
+                        currDetection.cameraId = camList[int(currDetection.originalCameraId)].id
+                    except IndexError:
+                        continue
                     if currDetection.eventType == "PERSONS":
                         if camList[currDetection.originalCameraId].personEventsList.full():
                             camList[currDetection.originalCameraId].personEventsList.get()
@@ -198,7 +203,7 @@ class EventMaster:
                     checkList = [currChecker.boundaries, currChecker.timeFromLastClosed, currChecker.eventInCamera]
                     if not all(checkList):
                         #print(f"fail: boundaries: {currChecker.boundaries} timeFromLastClosed: {currChecker.timeFromLastClosed} eventInCamera: {currChecker.eventInCamera}")
-                        break
+                        continue
                     currDetection.x, currDetection.y = currChecker.x, currChecker.y
                     camList[currDetection.originalCameraId].lastDetectionInCamera = time.time()
                     if currDetection.eventType != "PERSONS":

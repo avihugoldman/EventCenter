@@ -3,7 +3,7 @@ from queue import Queue
 
 
 class Camera:
-    def __init__(self,args, id, intEventTypes, timeToPublish, queueSize, timeoutAfterPublish, timeToOpenAfterClose, timeBetweenEvents, timeForWatchman,
+    def __init__(self, args, id, intEventTypes, timeToPublish, queueSize, timeoutAfterPublish, timeToOpenAfterClose, timeBetweenEvents, timeForWatchman,
                  maxSize, minSize, x_start, x_end, y_start, y_end, detectionRatio, TimeWithNoPerson, timeToPublishAnomly, queueSizeAnomaly):
         self.args = args
         self.id = id
