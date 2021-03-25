@@ -128,7 +128,7 @@ class EventMaster:
         massageReader.connect()
         return massageReader
 
-    def runAsServer(self, camList):
+    def run_as_server(self, camList):
         server = OpenSocket(self.args)
         server.server()
         eventList = []
@@ -147,9 +147,9 @@ class EventMaster:
                 except IndexError:
                     continue
                 currChecker = Checker(self.args, currDetection.eventType, currDetection.cameraId)
-                currChecker.isTimePassedFromLastEvent(camList[currDetection.originalCameraId])
-                currChecker.checkBoundaries(camList[currDetection.originalCameraId], currDetection)
-                currChecker.isEventInCamera(currDetection.eventType, camList[currDetection.originalCameraId].eventTypes)
+                currChecker.is_time_passed_from_last_event(camList[currDetection.originalCameraId])
+                currChecker.check_boundaries(camList[currDetection.originalCameraId], currDetection)
+                currChecker.is_event_in_camera(currDetection.eventType, camList[currDetection.originalCameraId].eventTypes)
                 checkList = [currChecker.boundaries, currChecker.timeFromLastClosed, currChecker.eventInCamera]
                 #print(currDetection)
                 if currDetection.eventType == "PERSONS":
@@ -167,12 +167,12 @@ class EventMaster:
                 else:
                     currEvent = Event(self.args, currDetection.cameraId, "NO_CROSS_ZONE")
                     eventList = currEvent.handle_detection(currEvent, currDetection, camList, eventList)
-                    if "PPE_HELMET" in camList[currDetection.originalCameraId].eventTypes and currChecker.isTimePassedFromLastHelmetEvent(
+                    if "PPE_HELMET" in camList[currDetection.originalCameraId].eventTypes and currChecker.is_time_passed_from_last_helmet_event(
                         camList[currDetection.originalCameraId]):
                         currEvent = Event(self.args, currDetection.cameraId, "PPE_HELMET")
                         eventList = currEvent.handle_detection(currEvent, currDetection, camList, eventList)
 
-    def runAsClient(self, camList, sock, type):
+    def run_as_client(self, camList, sock, type):
         eventList = []
         if type == "s":
             self.args["SMOKE"] = 1
@@ -197,9 +197,10 @@ class EventMaster:
                             camList[currDetection.originalCameraId].personEventsList.get()
                         camList[currDetection.originalCameraId].personEventsList.put(currDetection)
                     currChecker = Checker(self.args, currDetection.eventType, currDetection.cameraId)
-                    currChecker.isTimePassedFromLastEvent(camList[currDetection.originalCameraId])
-                    currChecker.checkBoundaries(camList[currDetection.originalCameraId], currDetection)
-                    currChecker.isEventInCamera(currDetection.eventType, camList[currDetection.originalCameraId].eventTypes)
+                    currChecker.is_time_passed_from_last_event(camList[currDetection.originalCameraId])
+                    currChecker.check_boundaries(camList[currDetection.originalCameraId], currDetection)
+                    currChecker.is_event_in_camera(currDetection.eventType,
+                                                   camList[currDetection.originalCameraId].eventTypes)
                     checkList = [currChecker.boundaries, currChecker.timeFromLastClosed, currChecker.eventInCamera]
                     if not all(checkList):
                         #print(f"fail: boundaries: {currChecker.boundaries} timeFromLastClosed: {currChecker.timeFromLastClosed} eventInCamera: {currChecker.eventInCamera}")
@@ -213,7 +214,7 @@ class EventMaster:
                         currEvent = Event(self.args, currDetection.cameraId, "NO_CROSS_ZONE")
                         eventList = currEvent.handle_detection(currEvent, currDetection, camList, eventList)
                         if "PPE_HELMET" in camList[
-                            currDetection.originalCameraId].eventTypes and currChecker.isTimePassedFromLastHelmetEvent(
+                            currDetection.originalCameraId].eventTypes and currChecker.is_time_passed_from_last_helmet_event(
                                 camList[currDetection.originalCameraId]):
                             currEvent = Event(self.args, currDetection.cameraId, "PPE_HELMET")
                             eventList = currEvent.handle_detection(currEvent, currDetection, camList, eventList)

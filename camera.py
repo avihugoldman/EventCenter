@@ -36,7 +36,7 @@ class Camera:
     def __repr__(self):
         return (f"camera {self.id} event_type are: {self.eventTypes}")
 
-    def convertEventIntToSTR(self):
+    def convert_event_int_to_str(self):
         strEventTypes = []
         for eventType in self.intEventTypes:
             if int(eventType) == self.args["PERSONS"]:
@@ -55,7 +55,7 @@ class Camera:
                 strEventTypes.append("ANOMALY")
         self.eventTypes = strEventTypes
 
-# class TimeOut:
+# class timeout:
 #     def __init__(self, eventType):
 #         self.eventType = eventType
 #         self.timeout = time.time()

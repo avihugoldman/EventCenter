@@ -15,7 +15,7 @@ if __name__ == '__main__':
     #camList = em.load_configuration_from_json("data_config.json")
 
     for camera in camList:
-        camera.convertEventIntToSTR()
+        camera.convert_event_int_to_str()
 
     if args.type == "Q":
         exit(0)
@@ -25,13 +25,13 @@ if __name__ == '__main__':
         test.start_test("SMOKE")
 
     elif args.type == "A":
-        em.runAsServer(camList)
+        em.run_as_server(camList)
 
     elif args.type == "P":
         sock = em.open_socket()
-        em.runAsClient(camList, sock, "p")
+        em.run_as_client(camList, sock, "p")
 
     elif args.type == "S":
         sock = em.open_socket()
-        em.runAsClient(camList, sock, "s")
+        em.run_as_client(camList, sock, "s")
 

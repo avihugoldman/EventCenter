@@ -10,7 +10,7 @@ class Checker(Event):
         self.timeFromLastClosed = True
         self.boundaries = True
 
-    def isTimePassedFromLastEvent(self, camera):
+    def is_time_passed_from_last_event(self, camera):
         if len(camera.lastEventsInCamera) > 0:
             if self.eventType != "PERSONS":
                 tempList = [event for event in camera.lastEventsInCamera if event.eventType == self.eventType and not event.open]
@@ -24,7 +24,7 @@ class Checker(Event):
                     if time.time() - event.closedTime < camera.timeToOpenAfterClose:
                         self.timeFromLastClosed = False
 
-    def isTimePassedFromLastHelmetEvent(self, camera):
+    def is_time_passed_from_last_helmet_event(self, camera):
         flag = True
         if len(camera.lastEventsInCamera) > 0:
             tempList = [event for event in camera.lastEventsInCamera if event.eventType == "PPE_HELMET" and not event.open]
@@ -34,7 +34,7 @@ class Checker(Event):
                         return False
         return True
 
-    def isEventInCamera(self, event, eventsInCamera):
+    def is_event_in_camera(self, event, eventsInCamera):
         if event == "PERSONS":
             if "PPE_HELMET" in eventsInCamera and "NO_CROSS_ZONE" in eventsInCamera:
                 return
@@ -50,7 +50,7 @@ class Checker(Event):
             else:
                 self.eventInCamera = False
 
-    def checkBoundaries(self, camera, detection):
+    def check_boundaries(self, camera, detection):
         detection_x_start = detection.x[0]
         detection_x_end = detection.x[1]
         detection_x_size = detection_x_end - detection_x_start
@@ -120,7 +120,7 @@ class Checker(Event):
     #         return True
     #     return False
 
-    def checkDeadMan(self):
+    def check_dead_man(self):
         pass
         # get pos vector in size of VECTOR_SIZE (numpy vector or list of floats) from yoav
         # make histogram on the last 30 frames.

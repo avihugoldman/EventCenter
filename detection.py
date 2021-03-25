@@ -20,7 +20,7 @@ class Detection:
     def encode(self, string):
         self.originalCameraId = int(string[0])
         self.serialId = int(string[1])
-        self.eventType = self.convertEventIntToSTR(int(string[2]))
+        self.eventType = self.convert_event_int_to_str(int(string[2]))
         self.subClass = int(string[3])
         self.objId = int(string[4])
         try:
@@ -28,13 +28,13 @@ class Detection:
         except IndexError:
             self.netName = "SMOKE"
         if self.netName == "SMOKE":
-            self.x = self.covertStrToFloatListYoav(string[5])
-            self.y = self.covertStrToFloatListYoav(string[5])
+            self.x = self.covert_str_to_float_list_yoav(string[5])
+            self.y = self.covert_str_to_float_list_yoav(string[5])
         else:
             self.x = [float(f) for f in string[5]]
             self.y = [float(f) for f in string[6]]
 
-    def convertEventIntToSTR(self, event_type):
+    def convert_event_int_to_str(self, event_type):
         if event_type == self.args["PERSONS"]:
             return "PERSONS"
         elif event_type == self.args["NO_CROSS_ZONE"]:
@@ -52,7 +52,7 @@ class Detection:
         else:
             return None
 
-    def covertStrToFloatListYoav(self, str_object):
+    def covert_str_to_float_list_yoav(self, str_object):
         temp_list = []
         list_object = []
         str_object = str_object.strip("[,]")
