@@ -182,6 +182,7 @@ class Event(Detection):
 
     def start_ship_event(self):
         eventId = None
+        print(self.cameraId, self.eventType)
         t = time.localtime()
         current_time = time.strftime("%H:%M:%S", t)
         string_to_send = """
@@ -201,7 +202,7 @@ class Event(Detection):
             try:
                 if self.args["DEBUG"]:
                     logging.debug(request.json())
-                eventId = request.json()['data']['start_ship_event']['id']
+                eventId = request.json()['data']['startShipEvent']['id']
                 if self.args["INFO"]:
                     print(f"start event {eventId} type {self.eventType} in camera {self.cameraId} in time {current_time}")
             except:
