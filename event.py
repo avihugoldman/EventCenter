@@ -1,6 +1,5 @@
 import time
 from detection import Detection
-#from event import event
 import logging
 import requests
 import threading
@@ -91,78 +90,89 @@ class Event(Detection):
 
     def handle_detection(self, event, detection, camList, eventList):
         if event in eventList:
-            flag = False
-            curr = eventList[eventList.index(event)]
-            curr.addObjectToList(detection.subClass, camList[curr.originalCameraId].queueSize)
-            #curr.realDetectionLIst = self.addObjectToList([], camList[curr.id].queueSize)
-            curr.lastUpdate = time.time()
-            curr.originalCameraId = detection.originalCameraId
-            time_diff = time.time() - curr.startTime
-            curr.x, curr.y, curr.serialId = detection.x, detection.y, detection.serialId
-            if detection.eventType != "ANOMALY":
-                if time_diff > camList[curr.originalCameraId].timeToPublish:
-                    flag = True
-            else:
-                if time_diff > camList[curr.originalCameraId].timeToPublish: #ready for new parmeter for anomaly
-                    flag = True
-            if flag:
-                if len(curr.subClassList) >= camList[curr.originalCameraId].queueSize:
-                    if detection.eventType != "PPE_HELMET":
-                        if curr.isItRealDetection(curr.subClassList):
-                            if curr.published:
-                                curr.fire_and_forget()
-                                if self.args["DEBUG"]:
-                                    print(f"event {curr.id} has been sent in time {time.time()} in camera {self.cameraId}")
-                            else:
-                                curr.publishShipEvent(camList)
-                                if self.args["DEBUG"]:
-                                    print(f"NO_CROSS_ZONE event published in camera {self.cameraId} in time {time.time()}")
-                    else:
-                        if curr.isItRealHelmetDetection(curr.subClassList, camList[curr.originalCameraId]):
-                            if curr.published:
-                                curr.fire_and_forget()
-                                if self.args["DEBUG"]:
-                                    print(f"event {curr.id} has been sent in time {time.time()} in camera {self.cameraId}")
-                            else:
-                                curr.publishShipEvent(camList)
-                                if self.args["DEBUG"]:
-                                    print(f"NO_CROSS_ZONE event published in camera {self.cameraId} in time {time.time()}")
+            event.handleOpenEvent(eventList, camList, detection)
         else:
-            if event.eventType == "ANOMALY":
-                if camList[detection.originalCameraId].personEventList.qsize() == 0:
-                    event.originalCameraId = detection.originalCameraId
-                    event.startShipEvent()
-                    #camList[detection.originalCameraId].timeoutCount = None
-                    if event.id:
-                        event.subClassList.append(detection.subClass)
-                        event.originalCameraId = detection.originalCameraId
-                        eventList.append(event)
+            eventList = event.handleStart(eventList, camList, detection)
+        return eventList
+
+    def handleOpenEvent(self, eventList, camList, detection):
+        flag = False
+        curr = eventList[eventList.index(self)]
+        curr.addObjectToList(detection.subClass, camList[curr.originalCameraId].queueSize)
+        # curr.realDetectionLIst = self.addObjectToList([], camList[curr.id].queueSize)
+        curr.lastUpdate = time.time()
+        curr.originalCameraId = detection.originalCameraId
+        time_diff = time.time() - curr.startTime
+        curr.x, curr.y, curr.serialId = detection.x, detection.y, detection.serialId
+        if detection.eventType != "ANOMALY":
+            if time_diff > camList[curr.originalCameraId].timeToPublish:
+                flag = True
+        else:
+            if time_diff > camList[curr.originalCameraId].timeToPublish:  # ready for new parmeter for anomaly
+                flag = True
+        if flag:
+            if len(curr.subClassList) >= camList[curr.originalCameraId].queueSize:
+                curr.publishOrSendEvent(detection, camList)
+
+    def publishOrSendEvent(self, detection, camList):
+        if detection.eventType != "PPE_HELMET":
+            if self.isItRealDetection(self.subClassList):
+                if self.published:
+                    self.fire_and_forget()
+                    if self.args["DEBUG"]:
+                        print(f"event {self.id} has been sent in time {time.time()} in camera {self.cameraId}")
                 else:
-                    if time.time() - camList[detection.originalCameraId].personEventList.pop().updateTime < camList[detection.originalCameraId].TimeWithNoPerson:
-                        return eventList
-                    else:
-                        event.originalCameraId = detection.originalCameraId
-                        event.startShipEvent()
-                        #camList[detection.originalCameraId].timeoutCount = None
-                        if event.id:
-                            event.subClassList.append(detection.subClass)
-                            event.originalCameraId = detection.originalCameraId
-                            eventList.append(event)
-            if event.eventType == "PPE_HELMET":
-                if detection.subClass == 2:
-                    event.originalCameraId = detection.originalCameraId
-                    event.startShipEvent()
-                    #camList[detection.originalCameraId].timeoutCount = None
-                    if event.id:
-                        event.subClassList.append(detection.subClass)
-                        eventList.append(event)
+                    self.publishShipEvent(camList)
+                    if self.args["DEBUG"]:
+                        print(f"NO_CROSS_ZONE event published in camera {self.cameraId} in time {time.time()}")
+        else:
+            if self.isItRealHelmetDetection(self.subClassList, camList[self.originalCameraId]):
+                if self.published:
+                    self.fire_and_forget()
+                    if self.args["DEBUG"]:
+                        print(f"event {self.id} has been sent in time {time.time()} in camera {self.cameraId}")
+                else:
+                    self.publishShipEvent(camList)
+                    if self.args["DEBUG"]:
+                        print(f"NO_CROSS_ZONE event published in camera {self.cameraId} in time {time.time()}")
+
+    def handleStart(self, eventList, camList, detection):
+        if self.eventType == "ANOMALY":
+            if camList[detection.originalCameraId].personEventList.qsize() == 0:
+                self.originalCameraId = detection.originalCameraId
+                self.startShipEvent()
+                # camList[detection.originalCameraId].timeoutCount = None
+                if self.id:
+                    self.subClassList.append(detection.subClass)
+                    self.originalCameraId = detection.originalCameraId
+                    eventList.append(self)
             else:
-                event.originalCameraId = detection.originalCameraId
-                event.startShipEvent()
-                #camList[detection.originalCameraId].timeoutCount = None
-                if event.id:
-                    event.subClassList.append(detection.subClass)
-                    eventList.append(event)
+                if time.time() - camList[detection.originalCameraId].personEventList.pop().updateTime < camList[
+                    detection.originalCameraId].TimeWithNoPerson:
+                    return eventList
+                else:
+                    self.originalCameraId = detection.originalCameraId
+                    self.startShipEvent()
+                    # camList[detection.originalCameraId].timeoutCount = None
+                    if self.id:
+                        self.subClassList.append(detection.subClass)
+                        self.originalCameraId = detection.originalCameraId
+                        eventList.append(self)
+        if self.eventType == "PPE_HELMET":
+            if detection.subClass == 2:
+                self.originalCameraId = detection.originalCameraId
+                self.startShipEvent()
+                # camList[detection.originalCameraId].timeoutCount = None
+                if self.id:
+                    self.subClassList.append(detection.subClass)
+                    eventList.append(self)
+        else:
+            self.originalCameraId = detection.originalCameraId
+            self.startShipEvent()
+            # camList[detection.originalCameraId].timeoutCount = None
+            if self.id:
+                self.subClassList.append(detection.subClass)
+                eventList.append(self)
         return eventList
 
     def addObjectToList(self, tempDetection, size):
