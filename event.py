@@ -182,7 +182,6 @@ class Event(Detection):
 
     def start_ship_event(self):
         eventId = None
-        print(self.cameraId, self.eventType)
         t = time.localtime()
         current_time = time.strftime("%H:%M:%S", t)
         string_to_send = """
