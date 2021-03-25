@@ -161,10 +161,10 @@ class Event(Detection):
             eventList.append(self)
 
     def is_it_real_detection(self, camList):
-        flag = False
-        if self.eventType == "SMOKE" or self.eventType == "PERSONS":
-            if time.time() - float(camList[self.originalCameraId].anomalyDetectionList.pop().lastUpdateTime) < 2:
-                flag = True
+        flag = True
+        #if self.eventType == "SMOKE" or self.eventType == "PERSONS":
+            #if time.time() - float(camList[self.originalCameraId].anomalyDetectionList.pop().lastUpdateTime) < 2:
+               # flag = True
         event_happening_counter = 0
         for detection in self.subClassList:
             if detection != None:
