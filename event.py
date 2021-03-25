@@ -159,6 +159,7 @@ class Event(Detection):
         if self.id:
             self.subClassList.append(detection.subClass)
             eventList.append(self)
+        return eventList
 
     def is_it_real_detection(self, camList):
         flag = True
