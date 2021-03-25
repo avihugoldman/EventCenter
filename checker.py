@@ -88,38 +88,6 @@ class Checker(Event):
             self.boundaries = False
         self.x, self.y = detection.x, detection.y
 
-    # def isItRealDetection(self, detection_queue):
-    #     event_happening_counter = 0
-    #     for detection in detection_queue:
-    #         if detection:
-    #             event_happening_counter += 1
-    #         else:
-    #             continue
-    #     if (event_happening_counter) > len(detection_queue) / 2:
-    #         return True
-    #     return False
-    #
-    # def isItRealHelmetDetection(self, detection_queue, camera):
-    #     event_happening_counter = 0
-    #     # Runs over 60 frames and counts in how many of them there is an event
-    #     for detection in detection_queue:
-    #         if detection == 2:
-    #             event_happening_counter += 1
-    #         else:
-    #             continue
-    #     # Check if at least half of the frames has an event
-    #     try:
-    #         score = float(len(detection_queue)) / 100
-    #     except IndexError:
-    #         score = float(20 / 100)
-    #     try:
-    #         score *= int(camera.detectionRatio)
-    #     except IndexError:
-    #         score *= int(camera.detectionRatio)
-    #     if (event_happening_counter) > score:
-    #         return True
-    #     return False
-
     def check_dead_man(self):
         pass
         # get pos vector in size of VECTOR_SIZE (numpy vector or list of floats) from yoav

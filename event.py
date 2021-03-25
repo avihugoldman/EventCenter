@@ -90,12 +90,12 @@ class Event(Detection):
 
     def handle_detection(self, event, detection, camList, eventList):
         if event in eventList:
-            event.handle_open_event(eventList, camList, detection)
+            event.handle_opened_event(eventList, camList, detection)
         else:
-            eventList = event.handle_start(eventList, camList, detection)
+            eventList = event.check_if_start(eventList, camList, detection)
         return eventList
 
-    def handle_open_event(self, eventList, camList, detection):
+    def handle_opened_event(self, eventList, camList, detection):
         flag = False
         curr = eventList[eventList.index(self)]
         curr.add_object_to_list(detection.subClass, camList[curr.originalCameraId].queueSize)
@@ -112,11 +112,11 @@ class Event(Detection):
                 flag = True
         if flag:
             if len(curr.subClassList) >= camList[curr.originalCameraId].queueSize:
-                curr.publish_or_send_event(detection, camList)
+                curr.check_if_publish_or_send_event(detection, camList)
 
-    def publish_or_send_event(self, detection, camList):
+    def check_if_publish_or_send_event(self, detection, camList):
         if detection.eventType != "PPE_HELMET":
-            if self.is_it_teal_detection(self.subClassList):
+            if self.is_it_real_detection(camList):
                 if self.published:
                     self.fire_and_forget()
                     if self.args["DEBUG"]:
@@ -136,44 +136,65 @@ class Event(Detection):
                     if self.args["DEBUG"]:
                         print(f"NO_CROSS_ZONE event published in camera {self.cameraId} in time {time.time()}")
 
-    def handle_start(self, eventList, camList, detection):
+    def check_if_start(self, eventList, camList, detection):
         if self.eventType == "ANOMALY":
             if camList[detection.originalCameraId].personEventList.qsize() == 0:
-                self.originalCameraId = detection.originalCameraId
-                self.start_ship_event()
-                # camList[detection.originalCameraId].timeoutCount = None
-                if self.id:
-                    self.subClassList.append(detection.subClass)
-                    self.originalCameraId = detection.originalCameraId
-                    eventList.append(self)
+                eventList = self.start_event(eventList, detection)
             else:
-                if time.time() - camList[detection.originalCameraId].personEventList.pop().updateTime < camList[
-                    detection.originalCameraId].TimeWithNoPerson:
+                if time.time() - camList[detection.originalCameraId].personEventList.pop().updateTime < camList[detection.originalCameraId].TimeWithNoPerson:
                     return eventList
                 else:
-                    self.originalCameraId = detection.originalCameraId
-                    self.start_ship_event()
-                    # camList[detection.originalCameraId].timeoutCount = None
-                    if self.id:
-                        self.subClassList.append(detection.subClass)
-                        self.originalCameraId = detection.originalCameraId
-                        eventList.append(self)
+                    eventList = self.start_event(eventList, detection)
         if self.eventType == "PPE_HELMET":
             if detection.subClass == 2:
-                self.originalCameraId = detection.originalCameraId
-                self.start_ship_event()
-                # camList[detection.originalCameraId].timeoutCount = None
-                if self.id:
-                    self.subClassList.append(detection.subClass)
-                    eventList.append(self)
+                eventList = self.start_event(eventList, detection)
         else:
-            self.originalCameraId = detection.originalCameraId
-            self.start_ship_event()
-            # camList[detection.originalCameraId].timeoutCount = None
-            if self.id:
-                self.subClassList.append(detection.subClass)
-                eventList.append(self)
+            eventList = self.start_event(eventList, detection)
         return eventList
+
+    def start_event(self, eventList, detection):
+        self.originalCameraId = detection.originalCameraId
+        self.start_ship_event()
+        # camList[detection.originalCameraId].timeoutCount = None
+        if self.id:
+            self.subClassList.append(detection.subClass)
+            eventList.append(self)
+
+    def is_it_real_detection(self, camList):
+        flag = False
+        if self.eventType == "SMOKE" or self.eventType == "PERSONS":
+            if time.time() - float(camList[self.originalCameraId].anomalyDetectionList.pop().lastUpdateTime) < 2:
+                flag = True
+        event_happening_counter = 0
+        for detection in self.subClassList:
+            if detection != None:
+                event_happening_counter += 1
+            else:
+                continue
+        if not (event_happening_counter) > len(self.subClassList) / 2:
+            flag = False
+        return flag
+
+    def is_it_real_helmet_detection(self, detection_queue, camera):
+        event_happening_counter = 0
+        # Runs over 60 frames and counts in how many of them there is an event
+        for detection in detection_queue:
+            if detection == 2:
+                event_happening_counter += 1
+            else:
+                continue
+        # Check if at least half of the frames has an event
+        try:
+            score = float(len(detection_queue)) / 100
+        except IndexError:
+            score = float(20 / 100)
+        try:
+            score *= int(camera.detectionRatio)
+        except IndexError:
+            score *= int(camera.detectionRatio)
+        if (event_happening_counter) > score:
+            return True
+        return False
 
     def add_object_to_list(self, tempDetection, size):
         if len(self.subClassList) > size:
@@ -320,37 +341,6 @@ class Event(Detection):
         self.published = False
         self.closedTime = time.time()
 
-    def is_it_teal_detection(self, detection_queue):
-        event_happening_counter = 0
-        for detection in detection_queue:
-            if detection != None:
-                event_happening_counter += 1
-            else:
-                continue
-        if (event_happening_counter) > len(detection_queue) / 2:
-            return True
-        return False
-
-    def is_it_real_helmet_detection(self, detection_queue, camera):
-        event_happening_counter = 0
-        # Runs over 60 frames and counts in how many of them there is an event
-        for detection in detection_queue:
-            if detection == 2:
-                event_happening_counter += 1
-            else:
-                continue
-        # Check if at least half of the frames has an event
-        try:
-            score = float(len(detection_queue)) / 100
-        except IndexError:
-            score = float(20 / 100)
-        try:
-            score *= int(camera.detectionRatio)
-        except IndexError:
-            score *= int(camera.detectionRatio)
-        if (event_happening_counter) > score:
-            return True
-        return False
 
 class Events:
     def __init__(self):

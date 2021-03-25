@@ -152,10 +152,7 @@ class EventMaster:
                 currChecker.is_event_in_camera(currDetection.eventType, camList[currDetection.originalCameraId].eventTypes)
                 checkList = [currChecker.boundaries, currChecker.timeFromLastClosed, currChecker.eventInCamera]
                 #print(currDetection)
-                if currDetection.eventType == "PERSONS":
-                    if camList[currDetection.originalCameraId].personEventList.full():
-                        camList[currDetection.originalCameraId].personEventList.get()
-                    camList[currDetection.originalCameraId].personEventList.put(currDetection)
+                self.add_detection_to_list(currDetection, camList)
                 if not all(checkList):
                     # print(f"fail: boundaries: {currChecker.boundaries} timeFromLastClosed: {currChecker.timeFromLastClosed} eventInCamera: {currChecker.eventInCamera}")
                     continue
@@ -171,6 +168,16 @@ class EventMaster:
                         camList[currDetection.originalCameraId]):
                         currEvent = Event(self.args, currDetection.cameraId, "PPE_HELMET")
                         eventList = currEvent.handle_detection(currEvent, currDetection, camList, eventList)
+
+    def add_detection_to_list(self, currDetection, camList):
+        if currDetection.eventType == "PERSONS":
+            if camList[currDetection.originalCameraId].personEventList.full():
+                camList[currDetection.originalCameraId].personEventList.get()
+            camList[currDetection.originalCameraId].personEventList.put(currDetection)
+        if currDetection.eventType == "ANOMALY":
+            if camList[currDetection.originalCameraId].anomalyDetectionList.full():
+                camList[currDetection.originalCameraId].anomalyDetectionList.get()
+            camList[currDetection.originalCameraId].anomalyDetectionList.put(currDetection)
 
     def run_as_client(self, camList, sock, type):
         eventList = []

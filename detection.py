@@ -23,6 +23,7 @@ class Detection:
         self.eventType = self.convert_event_int_to_str(int(string[2]))
         self.subClass = int(string[3])
         self.objId = int(string[4])
+        self.lastUpdateTime = time.time()
         try:
             self.netName = str(string[7])
         except IndexError:
