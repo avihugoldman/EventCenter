@@ -132,20 +132,26 @@ class EventMaster:
         server = OpenSocket(self.args)
         server.server()
         eventList = []
-        counter = 0
+        anomalyFrameCounter = 0
         while True:
-            counter += 1
             str_list = server.currMassage
             if not server.currMassage:
                 tempEvent = Event(self.args, -1, -1)
                 eventList = tempEvent.handle_no_detction(camList, eventList)
-            elif counter % 25 == 0: # Only for Anomaly network
+            else:
                 currDetection = Detection(self.args)
                 currDetection.encode(str_list)
                 try:
                     currDetection.cameraId = camList[int(currDetection.originalCameraId)].id
                 except IndexError:
                     continue
+                # Handle one of 100 anomaly detections:
+                if currDetection.netName == "Anomaly":
+                    anomalyFrameCounter += 1
+                    if anomalyFrameCounter % 100:
+                        continue
+                print(currDetection)
+                continue
                 currChecker = Checker(self.args, currDetection.eventType, currDetection.cameraId)
                 currChecker.is_time_passed_from_last_event(camList[currDetection.originalCameraId])
                 currChecker.check_boundaries(camList[currDetection.originalCameraId], currDetection)
