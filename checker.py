@@ -50,43 +50,72 @@ class Checker(Event):
             else:
                 self.eventInCamera = False
 
+    # def check_boundaries(self, camera, detection):
+    #     detection_x_start = detection.x[0]
+    #     detection_x_end = detection.x[1]
+    #     detection_x_size = detection_x_end - detection_x_start
+    #     detection_y_start = detection.y[0]
+    #     detection_y_end = detection.y[1]
+    #     detection_y_size = detection_y_end - detection_y_start
+    #     detectionTotalArea = detection_x_size * detection_y_size
+    #     if detection_x_start < float(camera.x_start):
+    #         # print("off limits!")
+    #         detection.x[0] = camera.x_start
+    #     if detection_x_end > float(camera.x_end):
+    #         # print("off limits!")
+    #         detection.x[1] = camera.x_end
+    #     if abs(detection.x[1] - detection.x[0]) <= 0.01:
+    #         self.boundaries = False
+    #     if (detection_y_size < camera.minSize or detection_y_size > camera.maxSize) and detection.eventType == "PERSONS":
+    #         self.boundaries = False
+    #     if detection_y_start < float(camera.y_start):
+    #         # print("off limits!")
+    #         detection.y[0] = camera.y_start
+    #     if detection_y_end > float(camera.y_end):
+    #         # print("off limits!")
+    #         detection.y[1] = camera.y_end
+    #     if abs(detection.y[1] - detection.y[0]) <= 0.01:
+    #         # print("problem")
+    #         self.boundaries = False
+    #     detection_x_start = detection.x[0]
+    #     detection_x_end = detection.x[1]
+    #     detection_x_size = detection_x_end - detection_x_start
+    #     detection_y_start = detection.y[0]
+    #     detection_y_end = detection.y[1]
+    #     detection_y_size = detection_y_end - detection_y_start
+    #     newDetectionTotalArea = detection_x_size * detection_y_size
+    #     if newDetectionTotalArea / detectionTotalArea < 0.8:
+    #         self.boundaries = False
+    #     self.x, self.y = detection.x, detection.y
+
     def check_boundaries(self, camera, detection):
-        detection_x_start = detection.x[0]
-        detection_x_end = detection.x[1]
-        detection_x_size = detection_x_end - detection_x_start
-        detection_y_start = detection.y[0]
-        detection_y_end = detection.y[1]
-        detection_y_size = detection_y_end - detection_y_start
+        detection_x_size = detection.x_end - detection.x_start
+        detection_y_size = detection.y_end - detection.y_start
         detectionTotalArea = detection_x_size * detection_y_size
-        if detection_x_start < float(camera.x_start):
+        if detection.x_start < float(camera.x_start):
             # print("off limits!")
-            detection.x[0] = camera.x_start
-        if detection_x_end > float(camera.x_end):
+            detection.x_start = camera.x_start
+        if detection.x_end > float(camera.x_end):
             # print("off limits!")
-            detection.x[1] = camera.x_end
-        if abs(detection.x[1] - detection.x[0]) <= 0.01:
+            detection.x_end = camera.x_end
+        if abs(detection.x_end - detection.x_start) <= 0.01:
             self.boundaries = False
         if (detection_y_size < camera.minSize or detection_y_size > camera.maxSize) and detection.eventType == "PERSONS":
             self.boundaries = False
-        if detection_y_start < float(camera.y_start):
+        if detection.y_start < float(camera.y_start):
             # print("off limits!")
-            detection.y[0] = camera.y_start
-        if detection_y_end > float(camera.y_end):
+            detection.y_start = camera.y_start
+        if detection.y_end > float(camera.y_end):
             # print("off limits!")
-            detection.y[1] = camera.y_end
-        if abs(detection.y[1] - detection.y[0]) <= 0.01:
-            # print("problem")
+            detection.y_end = camera.y_end
+        if abs(detection.y_end - detection.y_start) <= 0.01:
             self.boundaries = False
-        detection_x_start = detection.x[0]
-        detection_x_end = detection.x[1]
-        detection_x_size = detection_x_end - detection_x_start
-        detection_y_start = detection.y[0]
-        detection_y_end = detection.y[1]
-        detection_y_size = detection_y_end - detection_y_start
+        detection_x_size = detection.x_end - detection.x_start
+        detection_y_size = detection.y_end - detection.y_start
         newDetectionTotalArea = detection_x_size * detection_y_size
-        if newDetectionTotalArea / detectionTotalArea < 0.8:
+        if newDetectionTotalArea / detectionTotalArea < self.args["Ar"]:
             self.boundaries = False
-        self.x, self.y = detection.x, detection.y
+        self.x, self.y = [detection.x_start, detection.x_end], [detection.y_start, detection.y_end]
 
     def check_dead_man(self):
         pass
