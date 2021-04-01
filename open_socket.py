@@ -15,8 +15,11 @@ class OpenSocket:
         while conn:
             data = conn.recv(1024)
             if data:  # SEND ONLY WHEN NEW INFO IS RECEIVED
-                self.currMassage = pickle.loads(data)
-                #print(self.currMassage)
+                try:
+                    self.currMassage = pickle.loads(data)
+                    #print(self.currMassage)
+                except pickle.UnpicklingError:
+                    continue
             else:
                 break
         conn.close()

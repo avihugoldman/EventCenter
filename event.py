@@ -30,6 +30,7 @@ class Event(Detection):
 
     def handle_no_detction(self, camList, listOfTotalEvents):
         counter = -1
+        #print("NO DETECTION!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
         tempPublishedEventList = [tempEvent for tempEvent in listOfTotalEvents if tempEvent.published and tempEvent.eventType != "WATCHMAN"]
         for obj in tempPublishedEventList:
             if time.time() - obj.lastUpdate > camList[obj.originalCameraId].timeToPublish or time.time() - obj.publishedTime > \
@@ -55,7 +56,7 @@ class Event(Detection):
                 event = Event(self.args, camera.id, "WATCHMAN")
                 if event in listOfTotalEvents:
                     curr = listOfTotalEvents[listOfTotalEvents.index(event)]
-                    curr.x, curr.y, curr.serialId = [[0, 1]], [[0, 1]], 1
+                    curr.topLeft, curr.bottomRight, curr.serialId = [[0, 1]], [[0, 1]], 1
                     if time.time() - curr.startTime > camera.timeoutAfterPublish:
                         curr.end_ship_event()
                         camList[curr.originalCameraId].timeoutCount = time.time()
@@ -103,7 +104,7 @@ class Event(Detection):
         curr.lastUpdate = time.time()
         curr.originalCameraId = detection.originalCameraId
         time_diff = time.time() - curr.startTime
-        curr.x, curr.y, curr.serialId = detection.x, detection.y, detection.serialId
+        curr.topLeft, curr.bottomRight, curr.serialId = detection.topLeft, detection.bottomRight, detection.serialId
         if detection.eventType != "ANOMALY":
             if time_diff > camList[curr.originalCameraId].timeToPublish:
                 flag = True
@@ -119,22 +120,14 @@ class Event(Detection):
             if self.is_it_real_detection(camList):
                 if self.published:
                     self.fire_and_forget()
-                    if self.args["DEBUG"]:
-                        print(f"event {self.id} has been sent in time {time.time()} in camera {self.cameraId}")
                 else:
                     self.publish_ship_event(camList)
-                    if self.args["DEBUG"]:
-                        print(f"NO_CROSS_ZONE event published in camera {self.cameraId} in time {time.time()}")
         else:
             if self.is_it_real_helmet_detection(self.subClassList, camList[self.originalCameraId]):
                 if self.published:
                     self.fire_and_forget()
-                    if self.args["DEBUG"]:
-                        print(f"event {self.id} has been sent in time {time.time()} in camera {self.cameraId}")
                 else:
                     self.publish_ship_event(camList)
-                    if self.args["DEBUG"]:
-                        print(f"NO_CROSS_ZONE event published in camera {self.cameraId} in time {time.time()}")
 
     def check_if_start(self, eventList, camList, detection):
         if self.eventType == "ANOMALY":
@@ -250,8 +243,7 @@ class Event(Detection):
             if self.args["DEBUG"]:
                 logging.debug(request.json())
             if self.args["INFO"]:
-                print(
-                    f"Published event {self.id} type {self.eventType} in camera {self.cameraId} in time {current_time}")
+                print(f"Published event {self.id} type {self.eventType} in camera {self.cameraId} in time {current_time}")
         self.lastUpdate = time.time()
         self.published = True
         self.publishedTime = time.time()
@@ -260,8 +252,10 @@ class Event(Detection):
         camList[self.originalCameraId].lastEventsInCamera.append(self)
 
     def send_detection(self):
-        if self.x and self.y:
-            num_objects = len(self.x)
+        t = time.localtime()
+        current_time = time.strftime("%H:%M:%S", t)
+        if self.topLeft and self.bottomRight:
+            num_objects = len(self.topLeft)
             if num_objects <= 0:
                 return
             all_rects_str = ""
@@ -270,9 +264,9 @@ class Event(Detection):
                     0, 0, 0, 0)
                 all_rects_str += empty_rect_str
                 rect_str = "{x1:%0.3f, y1:%0.3f x2:%0.3f, y2:%0.3f}" % (
-                self.x[0],
-                self.y[0], self.x[1],
-                self.y[1])
+                self.topLeft[0],
+                self.bottomRight[0], self.topLeft[1],
+                self.bottomRight[1])
                 all_rects_str += rect_str
             string_to_send = """
                mutation{
@@ -305,7 +299,7 @@ class Event(Detection):
                    }
                }""" % (self.id, tempSerialId)
         if self.args["DEBUG"]:
-            logging.debug(string_to_send)
+            print(f"event {self.id} sent type {self.eventType} in camera {self.cameraId} in time {current_time}")
         request = requests.post(self.args["URL"], json={'query': string_to_send})
         if request.status_code != 200 and self.args["ERRORS"]:
             if self.args["WARNINGS"]:
@@ -320,7 +314,7 @@ class Event(Detection):
         t = time.localtime()
         current_time = time.strftime("%H:%M:%S", t)
         tempDetection = Detection(self.args)
-        tempDetection.serialId, tempDetection.x, tempDetection.y = 0, [], []
+        tempDetection.serialId, tempDetection.topLeft, tempDetection.bottomRight = 0, [], []
         self.fire_and_forget()
         string_to_send = """
            mutation{
@@ -333,8 +327,7 @@ class Event(Detection):
            """ % (self.id)
         request = requests.post(self.args["URL"], json={'query': string_to_send})
         if self.args["INFO"]:
-            print(
-                f"close event {self.id} type {self.eventType} in camera {self.cameraId} in time {current_time}")
+            print(f"close event {self.id} type {self.eventType} in camera {self.cameraId} in time {current_time}")
         if request.status_code != 200 and self.args["ERRORS"]:
             if self.args["WARNINGS"]:
                 logging.warning(f"Query failed to run by returning code of {request.status_code} in end_ship_event")
