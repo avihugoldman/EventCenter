@@ -30,7 +30,7 @@ class Camera:
         self.TimeWithNoPerson = TimeWithNoPerson
         self.timeToPublishAnomly = timeToPublishAnomly
         self.queueSizeAnomaly = queueSizeAnomaly
-        self.personEventsList = Queue(maxsize=2)
+        self.personEventList = Queue(maxsize=2)
         self.anomalyDetectionList = Queue(maxsize=2)
         self.lastEventsInCamera = []
 

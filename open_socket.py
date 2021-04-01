@@ -12,7 +12,6 @@ class OpenSocket:
         self.currMassage = []
 
     def receive_massage(self, conn):
-        dict = {}
         while conn:
             data = conn.recv(1024)
             if data:  # SEND ONLY WHEN NEW INFO IS RECEIVED

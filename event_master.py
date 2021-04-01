@@ -148,10 +148,9 @@ class EventMaster:
                 # Handle one of 100 anomaly detections:
                 if currDetection.netName == "Anomaly":
                     anomalyFrameCounter += 1
-                    if anomalyFrameCounter % 100:
+                    if anomalyFrameCounter % self.args["anomaly_reduce"]:
                         continue
-                print(currDetection)
-                continue
+                #print(currDetection)
                 currChecker = Checker(self.args, currDetection.eventType, currDetection.cameraId)
                 currChecker.is_time_passed_from_last_event(camList[currDetection.originalCameraId])
                 currChecker.check_boundaries(camList[currDetection.originalCameraId], currDetection)
@@ -160,9 +159,9 @@ class EventMaster:
                 #print(currDetection)
                 self.add_detection_to_list(currDetection, camList)
                 if not all(checkList):
-                    # print(f"fail: boundaries: {currChecker.boundaries} timeFromLastClosed: {currChecker.timeFromLastClosed} eventInCamera: {currChecker.eventInCamera}")
+                    #print(f"fail: boundaries: {currChecker.boundaries} timeFromLastClosed: {currChecker.timeFromLastClosed} eventInCamera: {currChecker.eventInCamera}")
                     continue
-                currDetection.x, currDetection.y = currChecker.x, currDetection.y
+                currDetection.topLeft, currDetection.bottomRight = currChecker.topLeft, currDetection.bottomRight
                 camList[currDetection.originalCameraId].lastDetectionInCamera = time.time()
                 if currDetection.eventType != "PERSONS":
                     currEvent = Event(self.args, currDetection.cameraId, currDetection.eventType)

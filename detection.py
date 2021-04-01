@@ -9,13 +9,13 @@ class Detection:
         self.objId = int
         self.eventType = str
         self.subClass = int
-        self.x = []
-        self.y = []
+        self.topLeft = []
+        self.bottomRight = []
         self.netName = str
         self.updateTime = time.time()
 
     def __repr__(self):
-        return (f"camera [{self.cameraId}] objId [{self.objId}] eventType [{self.eventType}] subClass [{self.subClass}] x {self.x} y {self.y}")
+        return (f"camera [{self.cameraId}] frame [{self.serialId}] eventType [{self.eventType}] subClass [{self.subClass}] objId [{self.objId}] top left {self.topLeft} bottom right {self.bottomRight} net name [{self.netName}]")
 
     # def encode(self, string):
     #     self.originalCameraId = int(string[0])
@@ -38,7 +38,7 @@ class Detection:
     def encode(self, string):
         self.originalCameraId = int(string["camera_number"])
         self.serialId = int(string["frame_number"])
-        self.eventType = string["event_type"]
+        self.eventType = self.convert_event_int_to_str(string["event_type"])
         self.subClass = int(string["obj_sub_class"])
         self.objId = int(string["obj_id"])
         self.lastUpdateTime = time.time()

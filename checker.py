@@ -113,7 +113,7 @@ class Checker(Event):
         detection_x_size = detection.x_end - detection.x_start
         detection_y_size = detection.y_end - detection.y_start
         newDetectionTotalArea = detection_x_size * detection_y_size
-        if newDetectionTotalArea / detectionTotalArea < self.args["Ar"]:
+        if newDetectionTotalArea / detectionTotalArea < self.args["Ir"]:
             self.boundaries = False
         self.x, self.y = [detection.x_start, detection.x_end], [detection.y_start, detection.y_end]
 
