@@ -3,7 +3,6 @@ from detection import Detection
 import logging
 import requests
 import threading
-import datetime
 
 
 class Event(Detection):
@@ -205,6 +204,8 @@ class Event(Detection):
 
     def start_ship_event(self):
         eventId = None
+        t = time.localtime()
+        current_time = time.strftime("%H:%M:%S", t)
         string_to_send = """
            mutation{
                startShipEvent(event:{ 
@@ -224,7 +225,7 @@ class Event(Detection):
                     logging.debug(request.json())
                 eventId = request.json()['data']['startShipEvent']['id']
                 if self.args["INFO"]:
-                    print(f"start event {eventId} type {self.eventType} in camera {self.cameraId} in time {datetime.datetime.now()}")
+                    print(f"start event {eventId} type {self.eventType} in camera {self.cameraId} in time {current_time}")
             except:
                 eventId = None
                 if self.args["WARNINGS"]:
@@ -234,6 +235,8 @@ class Event(Detection):
         self.open = True
 
     def publish_ship_event(self, camList):
+        t = time.localtime()
+        current_time = time.strftime("%H:%M:%S", t)
         string_to_send = """
            mutation{
                publishShipEvent(eventId: %d, publish: true){ 
@@ -248,7 +251,7 @@ class Event(Detection):
                 logging.debug(request.json())
             if self.args["INFO"]:
                 print(
-                    f"Published event {self.id} type {self.eventType} in camera {self.cameraId} in time {datetime.datetime.now()}")
+                    f"Published event {self.id} type {self.eventType} in camera {self.cameraId} in time {current_time}")
         self.lastUpdate = time.time()
         self.published = True
         self.publishedTime = time.time()
@@ -314,6 +317,8 @@ class Event(Detection):
 
     def end_ship_event(self):
         time.sleep(0.05)
+        t = time.localtime()
+        current_time = time.strftime("%H:%M:%S", t)
         tempDetection = Detection(self.args)
         tempDetection.serialId, tempDetection.x, tempDetection.y = 0, [], []
         self.fire_and_forget()
@@ -329,7 +334,7 @@ class Event(Detection):
         request = requests.post(self.args["URL"], json={'query': string_to_send})
         if self.args["INFO"]:
             print(
-                f"close event {self.id} type {self.eventType} in camera {self.cameraId} in time {datetime.datetime.now()}")
+                f"close event {self.id} type {self.eventType} in camera {self.cameraId} in time {current_time}")
         if request.status_code != 200 and self.args["ERRORS"]:
             if self.args["WARNINGS"]:
                 logging.warning(f"Query failed to run by returning code of {request.status_code} in end_ship_event")
