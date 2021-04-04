@@ -8,7 +8,7 @@
   "PPE_HELMET": 3,
   "WATCH_MAN_ALERT": 4,
   "DEAD_MAN_ALERT": 5,
-  "SMOKE_AND_LEAKAGE": 6,
+  "SMOKE": 6,
   "LEAKAGE": 7,
   "ANOMALY": 9,
   "anomaly_reduce": 100,

@@ -50,24 +50,27 @@ class Creator:
             event, netName = 3, "anomaly"
         elif net == 2:
             event, netName = 1, "smoke_and_leakage"
-        elif net == 1:
-            event, netName = 2, "smoke_and_leakage"
         else:
             event, netName = 0, "persons"
-        eventList = ["PERSONS", "SMOKE", "LEAGAGE", "ANOMALY", "DEAD_MAN_ALERT"]
+        eventList = ["PERSONS", "SMOKE", "LEAKAGE", "ANOMALY", "DEAD_MAN_ALERT"]
         #currMsg = Creator(random.randrange(0, 9, 1), counter, eventList[event], random.randrange(0, 2, 1), 1, [random.uniform(0.0, 1.0), random.uniform(0.0, 1.0)], [random.uniform(0.0, 1.0), random.uniform(0.0, 1.0)], netName)
-        self.msg["camera_number"] = random.randrange(0, 9, 1)
+        self.msg["camera_number"] = random.randrange(0, 3, 1)
         self.msg["frame_number"] = counter
         self.msg["event_type"] = eventList[event]
-        self.msg["obj_sub_class"] = random.randrange(0, 2, 1)
+        if self.msg["event_type"] == "PERSONS":
+            self.msg["obj_sub_class"] = random.randrange(0, 3, 1)
+        else:
+            self.msg["obj_sub_class"] = -1
         self.msg["obj_id"] = 1
         self.msg["top_left_rect"] = [random.uniform(0.0, 1.0), random.uniform(0.0, 1.0)]
         self.msg["bottom_right_rect"] = [random.uniform(0.0, 1.0), random.uniform(0.0, 1.0)]
         self.msg["algo_name"] = netName
+        #print(self.msg)
+
 
 counter = 0
 tmpCreator = Creator()
 while True:
-    time.sleep(0.07)
+    time.sleep(0.04)
     tmpCreator.send_dedctions(counter)
     counter += 1

@@ -46,7 +46,7 @@ class Camera:
                 strEventTypes.append("NO_CROSS_ZONE")
             elif int(eventType) == self.args["PPE_HELMET"]:
                 strEventTypes.append("PPE_HELMET")
-            elif int(eventType) == self.args["SMOKE_AND_LEAKAGE"]:
+            elif int(eventType) == self.args["SMOKE"]:
                 strEventTypes.append("SMOKE")
             elif int(eventType) == self.args["WATCH_MAN_ALERT"]:
                 strEventTypes.append("WATCHMAN")

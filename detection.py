@@ -38,7 +38,7 @@ class Detection:
     def encode(self, string):
         self.originalCameraId = int(string["camera_number"])
         self.serialId = int(string["frame_number"])
-        self.eventType = self.convert_event_int_to_str(string["event_type"])
+        self.eventType = string["event_type"]#self.convert_event_int_to_str(string["event_type"])
         self.subClass = int(string["obj_sub_class"])
         self.objId = int(string["obj_id"])
         self.lastUpdateTime = time.time()

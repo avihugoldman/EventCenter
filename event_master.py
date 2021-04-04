@@ -113,14 +113,15 @@ class EventMaster:
 
     def str_to_camera_att(self, att, listNumber, type):
         tmpStr = str(att[listNumber])
-        tmpList = tmpStr.split()
         if type == 0:
+            tmpList = tmpStr.split()
             tmpList = [int(num) for num in tmpList]
         elif type == 1:
+            tmpList = tmpStr.split()
             tmpList = [float(num) for num in tmpList]
         elif type == 2:
-            tmpList = [string[0] for string in tmpList]
-            tmpList = [string.split(",") for string in tmpList]
+            tmpList = tmpStr.split(",")
+            tmpList = [string.strip().split(" ") for string in tmpList if string]
         return tmpList
 
     def open_socket(self):
@@ -137,13 +138,14 @@ class EventMaster:
         lastFrame = -1
         while True:
             str_list = server.currMassage
+            #print(str_list)
             lastMassageTime = time.time()
             massageCounter += 1
             if not server.currMassage or time.time() - lastMassageTime > 0.5:
                 tempEvent = Event(self.args, -1, -1)
                 eventList = tempEvent.handle_no_detction(camList, eventList)
             else:
-                if massageCounter % 2:
+                if massageCounter % 5:
                     tempEvent = Event(self.args, -1, -1)
                     eventList = tempEvent.handle_no_detction(camList, eventList)
                 else:
@@ -171,8 +173,9 @@ class EventMaster:
                     self.add_detection_to_list(currDetection, camList)
                     if not all(checkList):
                         #print(f"fail: boundaries: {currChecker.boundaries} timeFromLastClosed: {currChecker.timeFromLastClosed} eventInCamera: {currChecker.eventInCamera}")
+                        #print(currDetection)
                         continue
-                    currDetection.topLeft, currDetection.bottomRight = currChecker.topLeft, currDetection.bottomRight
+                    currDetection.topLeft, currDetection.bottomRight = currChecker.x, currChecker.y
                     camList[currDetection.originalCameraId].lastDetectionInCamera = time.time()
                     if currDetection.eventType != "PERSONS":
                         currEvent = Event(self.args, currDetection.cameraId, currDetection.eventType)
