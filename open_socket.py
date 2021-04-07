@@ -18,7 +18,7 @@ class OpenSocket:
                 try:
                     self.currMassage = pickle.loads(data)
                     #print(self.currMassage)
-                except pickle.UnpicklingError:
+                except: #pickle.UnpicklingError:
                     continue
             else:
                 break
