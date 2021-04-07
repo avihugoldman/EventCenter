@@ -102,7 +102,7 @@ class Event(Detection):
         curr.lastUpdate = time.time()
         curr.originalCameraId = detection.originalCameraId
         time_diff = time.time() - curr.startTime
-        curr.x, curr.y, curr.serialId = detection.x, detection.y, detection.serialId
+        curr.topLeft, curr.bottomRight, curr.serialId = detection.topLeft, detection.bottomRight, detection.serialId
         if detection.eventType != "ANOMALY":
             if time_diff > camList[curr.originalCameraId].timeToPublish:
                 flag = True
@@ -140,7 +140,7 @@ class Event(Detection):
             if camList[detection.originalCameraId].personEventList.qsize() == 0:
                 eventList = self.start_event(eventList, detection)
             else:
-                if time.time() - camList[detection.originalCameraId].personEventList.pop().updateTime < camList[detection.originalCameraId].TimeWithNoPerson:
+                if time.time() - camList[detection.originalCameraId].personEventList.get().updateTime < camList[detection.originalCameraId].TimeWithNoPerson:
                     return eventList
                 else:
                     eventList = self.start_event(eventList, detection)
@@ -162,9 +162,13 @@ class Event(Detection):
 
     def is_it_real_detection(self, camList):
         flag = True
-        #if self.eventType == "SMOKE" or self.eventType == "PERSONS":
-            #if time.time() - float(camList[self.originalCameraId].anomalyDetectionList.pop().lastUpdateTime) < 2:
-               # flag = True
+        if self.eventType == "SMOKE" or self.eventType == "NO_CROSS_ZONE" or self.eventType == "PPE_HELMET":
+            if camList[self.originalCameraId].anomalyDetectionList.qsize() == 0:
+                flag = False
+            else:
+                lastAnomalyDetection = camList[self.originalCameraId].anomalyDetectionList.get().lastUpdateTime
+                if time.time() - lastAnomalyDetection > 1:
+                    flag = False
         event_happening_counter = 0
         for detection in self.subClassList:
             if detection != None:
@@ -203,50 +207,61 @@ class Event(Detection):
 
     def start_ship_event(self):
         eventId = None
-        string_to_send = """
-           mutation{
-               startShipEvent(event:{ 
-                 cameraUid: "%d"
-                 eventType: %s
-               }){ 
-               id
-                 }
-               }
-           """ % (self.cameraId, self.eventType)
-        request = requests.post(self.args["URL"], json={'query': string_to_send})
-        if request.status_code != 200 and self.args["ERRORS"]:
-            logging.error(f"Query failed to run by returning code of {request.status_code} in startEvent")
+        if self.args["TEST"]:
+            eventId = 111
+            if self.args["INFO"]:
+                print(
+                    f"start event {eventId} type {self.eventType} in camera {self.cameraId} in time {datetime.datetime.now()}")
         else:
-            try:
-                if self.args["DEBUG"]:
-                    logging.debug(request.json())
-                eventId = request.json()['data']['startShipEvent']['id']
-                if self.args["INFO"]:
-                    print(f"start event {eventId} type {self.eventType} in camera {self.cameraId} in time {datetime.datetime.now()}")
-            except:
-                eventId = None
-                if self.args["WARNINGS"]:
-                    logging.warning("Failed to get id from server")
+            string_to_send = """
+               mutation{
+                   startShipEvent(event:{ 
+                     cameraUid: "%d"
+                     eventType: %s
+                   }){ 
+                   id
+                     }
+                   }
+               """ % (self.cameraId, self.eventType)
+            request = requests.post(self.args["URL"], json={'query': string_to_send})
+            if request.status_code != 200 and self.args["ERRORS"]:
+                logging.error(f"Query failed to run by returning code of {request.status_code} in startEvent")
+            else:
+                try:
+                    if self.args["DEBUG"]:
+                        logging.debug(request.json())
+                    eventId = request.json()['data']['startShipEvent']['id']
+                    if self.args["INFO"]:
+                        print(f"start event {eventId} type {self.eventType} in camera {self.cameraId} in time {datetime.datetime.now()}")
+                except:
+                    eventId = None
+                    if self.args["WARNINGS"]:
+                        logging.warning("Failed to get id from server")
         self.id = eventId
         self.startTime, self.lastUpdate = time.time(), time.time()
         self.open = True
 
     def publish_ship_event(self, camList):
-        string_to_send = """
-           mutation{
-               publishShipEvent(eventId: %d, publish: true){ 
-               id
-             }
-           }""" % (self.id)
-        request = requests.post(self.args["URL"], json={'query': string_to_send})
-        if request.status_code != 200 and self.args["ERRORS"]:
-            logging.error(f"Query failed to run by returning code of {request.status_code} in publishEvent")
-        else:
-            if self.args["DEBUG"]:
-                logging.debug(request.json())
+        if self.args["TEST"]:
             if self.args["INFO"]:
                 print(
                     f"Published event {self.id} type {self.eventType} in camera {self.cameraId} in time {datetime.datetime.now()}")
+        else:
+            string_to_send = """
+               mutation{
+                   publishShipEvent(eventId: %d, publish: true){ 
+                   id
+                 }
+               }""" % (self.id)
+            request = requests.post(self.args["URL"], json={'query': string_to_send})
+            if request.status_code != 200 and self.args["ERRORS"]:
+                logging.error(f"Query failed to run by returning code of {request.status_code} in publishEvent")
+            else:
+                if self.args["DEBUG"]:
+                    logging.debug(request.json())
+                if self.args["INFO"]:
+                    print(
+                        f"Published event {self.id} type {self.eventType} in camera {self.cameraId} in time {datetime.datetime.now()}")
         self.lastUpdate = time.time()
         self.published = True
         self.publishedTime = time.time()
@@ -255,56 +270,57 @@ class Event(Detection):
         camList[self.originalCameraId].lastEventsInCamera.append(self)
 
     def send_detection(self):
-        if self.x and self.y:
-            num_objects = len(self.x)
-            if num_objects <= 0:
-                return
-            all_rects_str = ""
-            if True:
-                empty_rect_str = "{x1:%0.3f, y1:%0.3f x2:%0.3f, y2:%0.3f}" % (
-                    0, 0, 0, 0)
-                all_rects_str += empty_rect_str
-                rect_str = "{x1:%0.3f, y1:%0.3f x2:%0.3f, y2:%0.3f}" % (
-                self.x[0],
-                self.y[0], self.x[1],
-                self.y[1])
-                all_rects_str += rect_str
-            string_to_send = """
-               mutation{
-                   addShipDetection(event:{
-                     eventId: %d
-                     serialId: %d
-                     boundingAreas: [%s]
-                   }){
-                     id,
-                     serialId,
-                     boundingAreas {
-                       x1, y1, x2, y2
-                     }
-                   }
-                   }""" % (self.id, self.serialId, all_rects_str)
-        else:
-            tempSerialId = 1
-            string_to_send = """
-               mutation
-               {
-                   addShipDetection(event:{
-                     eventId: %d
-                     serialId: %d
-                     boundingAreas: {x1:0.0,y1:0.0,x2:0.0,y2:0.0}
-                   }){
-                     id,
-                     boundingAreas {
-                       x1, y1, x2, y2
-                     }
-                   }
-               }""" % (self.id, tempSerialId)
-        if self.args["DEBUG"]:
-            logging.debug(string_to_send)
-        request = requests.post(self.args["URL"], json={'query': string_to_send})
-        if request.status_code != 200 and self.args["ERRORS"]:
-            if self.args["WARNINGS"]:
-                logging.warning(f"Query failed to run by returning code of {request.status_code} in send_detection")
+        if not self.args["TEST"]:
+            if self.x and self.y:
+                num_objects = len(self.x)
+                if num_objects <= 0:
+                    return
+                all_rects_str = ""
+                if True:
+                    empty_rect_str = "{x1:%0.3f, y1:%0.3f x2:%0.3f, y2:%0.3f}" % (
+                        0, 0, 0, 0)
+                    all_rects_str += empty_rect_str
+                    rect_str = "{x1:%0.3f, y1:%0.3f x2:%0.3f, y2:%0.3f}" % (
+                    self.x[0],
+                    self.y[0], self.x[1],
+                    self.y[1])
+                    all_rects_str += rect_str
+                string_to_send = """
+                   mutation{
+                       addShipDetection(event:{
+                         eventId: %d
+                         serialId: %d
+                         boundingAreas: [%s]
+                       }){
+                         id,
+                         serialId,
+                         boundingAreas {
+                           x1, y1, x2, y2
+                         }
+                       }
+                       }""" % (self.id, self.serialId, all_rects_str)
+            else:
+                tempSerialId = 1
+                string_to_send = """
+                   mutation
+                   {
+                       addShipDetection(event:{
+                         eventId: %d
+                         serialId: %d
+                         boundingAreas: {x1:0.0,y1:0.0,x2:0.0,y2:0.0}
+                       }){
+                         id,
+                         boundingAreas {
+                           x1, y1, x2, y2
+                         }
+                       }
+                   }""" % (self.id, tempSerialId)
+            if self.args["DEBUG"]:
+                logging.debug(string_to_send)
+            request = requests.post(self.args["URL"], json={'query': string_to_send})
+            if request.status_code != 200 and self.args["ERRORS"]:
+                if self.args["WARNINGS"]:
+                    logging.warning(f"Query failed to run by returning code of {request.status_code} in send_detection")
         self.lastUpdate = time.time()
 
     def fire_and_forget(self):
@@ -315,26 +331,30 @@ class Event(Detection):
         tempDetection = Detection(self.args)
         tempDetection.serialId, tempDetection.x, tempDetection.y = 0, [], []
         self.fire_and_forget()
-        string_to_send = """
-           mutation{
-               endShipEvent(eventId: 
-                 %d
-               ){ 
-               id,
-                 }
-               }
-           """ % (self.id)
-        request = requests.post(self.args["URL"], json={'query': string_to_send})
-        if self.args["INFO"]:
-            print(
-                f"close event {self.id} type {self.eventType} in camera {self.cameraId} in time {datetime.datetime.now()}")
-        if request.status_code != 200 and self.args["ERRORS"]:
-            if self.args["WARNINGS"]:
-                logging.warning(f"Query failed to run by returning code of {request.status_code} in end_ship_event")
+        if not self.args["TEST"]:
+            string_to_send = """
+               mutation{
+                   endShipEvent(eventId: 
+                     %d
+                   ){ 
+                   id,
+                     }
+                   }
+               """ % (self.id)
+            request = requests.post(self.args["URL"], json={'query': string_to_send})
+            if self.args["INFO"]:
+                print(
+                    f"close event {self.id} type {self.eventType} in camera {self.cameraId} in time {datetime.datetime.now()}")
+            if request.status_code != 200 and self.args["ERRORS"]:
+                if self.args["WARNINGS"]:
+                    logging.warning(f"Query failed to run by returning code of {request.status_code} in end_ship_event")
+        else:
+            if self.args["INFO"]:
+                print(
+                    f"close event {self.id} type {self.eventType} in camera {self.cameraId} in time {datetime.datetime.now()}")
         self.open = False
         self.published = False
         self.closedTime = time.time()
-
 
 class Events:
     def __init__(self):

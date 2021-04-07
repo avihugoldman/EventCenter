@@ -54,7 +54,7 @@ class Creator:
             event, netName = 0, "persons"
         eventList = ["PERSONS", "SMOKE", "LEAKAGE", "ANOMALY", "DEAD_MAN_ALERT"]
         #currMsg = Creator(random.randrange(0, 9, 1), counter, eventList[event], random.randrange(0, 2, 1), 1, [random.uniform(0.0, 1.0), random.uniform(0.0, 1.0)], [random.uniform(0.0, 1.0), random.uniform(0.0, 1.0)], netName)
-        self.msg["camera_number"] = random.randrange(0, 3, 1)
+        self.msg["camera_number"] = random.randrange(0, 10, 1)
         self.msg["frame_number"] = counter
         self.msg["event_type"] = eventList[event]
         if self.msg["event_type"] == "PERSONS":
@@ -71,6 +71,6 @@ class Creator:
 counter = 0
 tmpCreator = Creator()
 while True:
-    time.sleep(0.04)
+    time.sleep(0.004)
     tmpCreator.send_dedctions(counter)
     counter += 1

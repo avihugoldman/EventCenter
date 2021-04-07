@@ -43,13 +43,11 @@ class Checker(Event):
             elif "PPE_HELMET" in eventsInCamera:
                 self.eventType = "PPE_HELMET"
             else:
-                print(self.eventType, eventsInCamera)
                 self.eventInCamera = False
         else:
             if event in eventsInCamera:
                 self.eventType = event
             else:
-                print(self.eventType, eventsInCamera)
                 self.eventInCamera = False
 
     # def check_boundaries(self, camera, detection):

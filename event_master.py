@@ -145,16 +145,16 @@ class EventMaster:
                 tempEvent = Event(self.args, -1, -1)
                 eventList = tempEvent.handle_no_detction(camList, eventList)
             else:
-                if massageCounter % 5:
+                if massageCounter % 10:
                     tempEvent = Event(self.args, -1, -1)
                     eventList = tempEvent.handle_no_detction(camList, eventList)
                 else:
                     currDetection = Detection(self.args)
                     currDetection.encode(str_list)
                     # Handle each frame once:
-                    if currDetection.serialId == lastFrame:
+                    if lastFrame == (currDetection.serialId, currDetection.cameraId):
                         continue
-                    lastFrame = currDetection.serialId
+                    lastFrame = (currDetection.serialId, currDetection.cameraId)
                     try:
                         currDetection.cameraId = camList[int(currDetection.originalCameraId)].id
                     except IndexError:
@@ -169,11 +169,12 @@ class EventMaster:
                     currChecker.check_boundaries(camList[currDetection.originalCameraId], currDetection)
                     currChecker.is_event_in_camera(currDetection.eventType, camList[currDetection.originalCameraId].eventTypes)
                     checkList = [currChecker.boundaries, currChecker.timeFromLastClosed, currChecker.eventInCamera]
-                    #print(currDetection)
+                    if self.args["DEBUG"]:
+                        print(currDetection)
                     self.add_detection_to_list(currDetection, camList)
                     if not all(checkList):
-                        #print(f"fail: boundaries: {currChecker.boundaries} timeFromLastClosed: {currChecker.timeFromLastClosed} eventInCamera: {currChecker.eventInCamera}")
-                        #print(currDetection)
+                        if self.args["DEBUG"]:
+                            print(f"fail: boundaries: {currChecker.boundaries} timeFromLastClosed: {currChecker.timeFromLastClosed} eventInCamera: {currChecker.eventInCamera}")
                         continue
                     currDetection.topLeft, currDetection.bottomRight = currChecker.x, currChecker.y
                     camList[currDetection.originalCameraId].lastDetectionInCamera = time.time()
