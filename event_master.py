@@ -138,7 +138,6 @@ class EventMaster:
         lastFrame = -1
         while True:
             str_list = server.currMassage
-            #print(str_list)
             lastMassageTime = time.time()
             massageCounter += 1
             if not server.currMassage or time.time() - lastMassageTime > 0.5:
@@ -148,46 +147,45 @@ class EventMaster:
                 if massageCounter % 10:
                     tempEvent = Event(self.args, -1, -1)
                     eventList = tempEvent.handle_no_detction(camList, eventList)
+                currDetection = Detection(self.args)
+                currDetection.encode(str_list)
+                # Handle each frame once:
+                if lastFrame == (currDetection.serialId, currDetection.cameraId):
+                    continue
+                lastFrame = (currDetection.serialId, currDetection.cameraId)
+                try:
+                    currDetection.cameraId = camList[int(currDetection.originalCameraId)].id
+                except IndexError:
+                    continue
+                # Handle one of 100 anomaly detections:
+                # if currDetection.netName == "Anomaly":
+                #     anomalyFrameCounter += 1
+                #     if anomalyFrameCounter % self.args["anomaly_reduce"]:
+                #         continue
+                currChecker = Checker(self.args, currDetection.eventType, currDetection.cameraId)
+                currChecker.is_time_passed_from_last_event(camList[currDetection.originalCameraId])
+                currChecker.check_boundaries(camList[currDetection.originalCameraId], currDetection)
+                currChecker.is_event_in_camera(currDetection.eventType, camList[currDetection.originalCameraId].eventTypes)
+                checkList = [currChecker.boundaries, currChecker.timeFromLastClosed, currChecker.eventInCamera]
+                if self.args["DEBUG"] and currDetection.eventType != "ANOMALY":
+                    print(currDetection)
+                self.add_detection_to_list(currDetection, camList)
+                if not all(checkList):
+                    #if self.args["DEBUG"]:
+                       # print(f"fail: boundaries: {currChecker.boundaries} timeFromLastClosed: {currChecker.timeFromLastClosed} eventInCamera: {currChecker.eventInCamera}")
+                    continue
+                currDetection.x, currDetection.y = currChecker.x, currChecker.y
+                camList[currDetection.originalCameraId].lastDetectionInCamera = time.time()
+                if currDetection.eventType != "PERSONS":
+                    currEvent = Event(self.args, currDetection.cameraId, currDetection.eventType)
+                    eventList = currEvent.handle_detection(currEvent, currDetection, camList, eventList)
                 else:
-                    currDetection = Detection(self.args)
-                    currDetection.encode(str_list)
-                    # Handle each frame once:
-                    if lastFrame == (currDetection.serialId, currDetection.cameraId):
-                        continue
-                    lastFrame = (currDetection.serialId, currDetection.cameraId)
-                    try:
-                        currDetection.cameraId = camList[int(currDetection.originalCameraId)].id
-                    except IndexError:
-                        continue
-                    # Handle one of 100 anomaly detections:
-                    if currDetection.netName == "Anomaly":
-                        anomalyFrameCounter += 1
-                        if anomalyFrameCounter % self.args["anomaly_reduce"]:
-                            continue
-                    currChecker = Checker(self.args, currDetection.eventType, currDetection.cameraId)
-                    currChecker.is_time_passed_from_last_event(camList[currDetection.originalCameraId])
-                    currChecker.check_boundaries(camList[currDetection.originalCameraId], currDetection)
-                    currChecker.is_event_in_camera(currDetection.eventType, camList[currDetection.originalCameraId].eventTypes)
-                    checkList = [currChecker.boundaries, currChecker.timeFromLastClosed, currChecker.eventInCamera]
-                    if self.args["DEBUG"]:
-                        print(currDetection)
-                    self.add_detection_to_list(currDetection, camList)
-                    if not all(checkList):
-                        if self.args["DEBUG"]:
-                            print(f"fail: boundaries: {currChecker.boundaries} timeFromLastClosed: {currChecker.timeFromLastClosed} eventInCamera: {currChecker.eventInCamera}")
-                        continue
-                    currDetection.topLeft, currDetection.bottomRight = currChecker.x, currChecker.y
-                    camList[currDetection.originalCameraId].lastDetectionInCamera = time.time()
-                    if currDetection.eventType != "PERSONS":
-                        currEvent = Event(self.args, currDetection.cameraId, currDetection.eventType)
+                    currEvent = Event(self.args, currDetection.cameraId, "NO_CROSS_ZONE")
+                    eventList = currEvent.handle_detection(currEvent, currDetection, camList, eventList)
+                    if "PPE_HELMET" in camList[currDetection.originalCameraId].eventTypes and currChecker.is_time_passed_from_last_helmet_event(
+                        camList[currDetection.originalCameraId]):
+                        currEvent = Event(self.args, currDetection.cameraId, "PPE_HELMET")
                         eventList = currEvent.handle_detection(currEvent, currDetection, camList, eventList)
-                    else:
-                        currEvent = Event(self.args, currDetection.cameraId, "NO_CROSS_ZONE")
-                        eventList = currEvent.handle_detection(currEvent, currDetection, camList, eventList)
-                        if "PPE_HELMET" in camList[currDetection.originalCameraId].eventTypes and currChecker.is_time_passed_from_last_helmet_event(
-                            camList[currDetection.originalCameraId]):
-                            currEvent = Event(self.args, currDetection.cameraId, "PPE_HELMET")
-                            eventList = currEvent.handle_detection(currEvent, currDetection, camList, eventList)
 
     def add_detection_to_list(self, currDetection, camList):
         if currDetection.eventType == "PERSONS":

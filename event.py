@@ -97,7 +97,7 @@ class Event(Detection):
     def handle_opened_event(self, eventList, camList, detection):
         flag = False
         curr = eventList[eventList.index(self)]
-        curr.add_object_to_list(detection.subClass, camList[curr.originalCameraId].queueSize)
+        curr.add_object_to_list(detection.subClass, camList[curr.originalCameraId].queueSize - 1)
         # curr.realDetectionLIst = self.add_object_to_list([], camList[curr.id].queueSize)
         curr.lastUpdate = time.time()
         curr.originalCameraId = detection.originalCameraId
@@ -123,7 +123,7 @@ class Event(Detection):
                 else:
                     self.publish_ship_event(camList)
                     if self.args["DEBUG"]:
-                        print(f"NO_CROSS_ZONE event published in camera {self.cameraId} in time {time.time()}")
+                        print(f"{self.eventType} event published in camera {self.cameraId} in time {time.time()}")
         else:
             if self.is_it_real_helmet_detection(self.subClassList, camList[self.originalCameraId]):
                 if self.published:
@@ -164,10 +164,12 @@ class Event(Detection):
         flag = True
         if self.eventType == "SMOKE" or self.eventType == "NO_CROSS_ZONE" or self.eventType == "PPE_HELMET":
             if camList[self.originalCameraId].anomalyDetectionList.qsize() == 0:
+                print("No anomaly")
                 flag = False
             else:
                 lastAnomalyDetection = camList[self.originalCameraId].anomalyDetectionList.get().lastUpdateTime
                 if time.time() - lastAnomalyDetection > 1:
+                    print("No anomaly")
                     flag = False
         event_happening_counter = 0
         for detection in self.subClassList:

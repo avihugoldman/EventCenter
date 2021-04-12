@@ -13,6 +13,8 @@ class Detection:
         self.bottomRight = []
         self.netName = str
         self.updateTime = time.time()
+        self.x = []
+        self.y = []
 
     def __repr__(self):
         return (f"camera [{self.cameraId}] frame [{self.serialId}] eventType [{self.eventType}] subClass [{self.subClass}] objId [{self.objId}] top left {self.topLeft} bottom right {self.bottomRight} net name [{self.netName}]")

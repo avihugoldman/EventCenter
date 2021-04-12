@@ -1,6 +1,10 @@
 import socket
 import threading
 import pickle
+import logging
+import coloredlogs
+
+coloredlogs.install(fmt='%(asctime)s.%(msecs)04d %(levelname)s %(message)s', datefmt='%H:%M:%S')
 
 
 class OpenSocket:
@@ -10,18 +14,22 @@ class OpenSocket:
         self.host = self.args["HOST"]
         self.port = self.args["PORT"]
         self.currMassage = []
+        self.max_message_length = self.args["Max_Message_Size"] # 1024
 
     def receive_massage(self, conn):
+        # maybe get it out to config \ args
         while conn:
-            data = conn.recv(1024)
-            if data:  # SEND ONLY WHEN NEW INFO IS RECEIVED
+            data = conn.recv(self.max_message_length)
+            if len(data) < self.max_message_length:
                 try:
                     self.currMassage = pickle.loads(data)
-                    #print(self.currMassage)
-                except: #pickle.UnpicklingError:
+                except Exception as e:
+                    # show me the error message and continue
+                    logging.error(e)
                     continue
             else:
-                break
+                # changed to continue from break, because want to take next message and not break from loop!
+                continue
         conn.close()
 
         self.serverName.close()

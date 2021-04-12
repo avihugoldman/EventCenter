@@ -69,5 +69,6 @@
   "DEBUG":
   0,
   "TEST":
-  0
+  0,
+  "Max_Message_Size": 1024
 }
